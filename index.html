@@ -435,12 +435,32 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 .impact h2{font-size:clamp(2.4rem,5vw,4.2rem);margin:18px 0 12px}
 .impact .sub{color:var(--muted-l);margin-bottom:32px;font-size:1.02rem}
 .imp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.imp{background:var(--giorno-2);border:1px solid var(--line-l);border-radius:16px;padding:30px 26px}
+.imp{position:relative;overflow:hidden;isolation:isolate;background:var(--giorno-2);border:1px solid var(--line-l);border-radius:16px;padding:30px 26px;transition:color .45s var(--ease),border-color .45s var(--ease)}
 .imp .ico{width:54px;margin-bottom:16px}
 .imp .big{font-family:'Bricolage Grotesque',sans-serif;font-weight:780;font-size:clamp(1.9rem,3.2vw,2.5rem);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
 .imp .big i{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:.6em;color:var(--muted-l)}
 .imp h3{font-size:1rem;margin:8px 0 6px}
 .imp p{font-size:.9rem;color:var(--muted-l)}
+/* sfondo fotografico interattivo (dietro il contenuto, nessun salto di layout) */
+.imp::before{content:'';position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center;opacity:0;transition:opacity .5s var(--ease)}
+.imp::after{content:'';position:absolute;inset:0;z-index:-1;background:rgba(0,0,0,.6);opacity:0;transition:opacity .5s var(--ease)}
+.imp-a::before{background-image:url(impatto-alberi.webp)}
+.imp-km::before{background-image:url(impatto-km.webp)}
+.imp-co2::before{background-image:url(impatto-co2.webp)}
+.imp .ico svg [fill]{transition:fill .45s var(--ease)}.imp .ico svg [stroke]{transition:stroke .45s var(--ease)}
+@media (hover:hover){
+  .imp:hover{border-color:transparent;color:#fff}
+  .imp:hover::before,.imp:hover::after{opacity:1}
+  .imp:hover h3,.imp:hover p,.imp:hover .big,.imp:hover .big i{color:#fff}
+  .imp:hover .ico svg [fill]{fill:#fff}.imp:hover .ico svg [stroke]{stroke:#fff}
+}
+/* touch: dissolvenza lenta quando la card entra in viewport */
+@media (hover:none){
+  .imp.in{border-color:transparent;color:#fff}
+  .imp.in::before,.imp.in::after{opacity:1}
+  .imp.in h3,.imp.in p,.imp.in .big,.imp.in .big i{color:#fff}
+  .imp.in .ico svg [fill]{fill:#fff}.imp.in .ico svg [stroke]{stroke:#fff}
+}
 
 /* H 19:00 — recensioni: griglia pulita, stabile, leggibile */
 .reviews{position:relative;padding:48px 0;background:var(--giorno)}
@@ -1088,7 +1108,7 @@ footer p{font-size:.85rem;line-height:1.7}
     <h2 class="tr">Il tuo risparmio, <em>tradotto in pianeta.</em></h2>
     <p class="sub fx">I valori si aggiornano in base alla bolletta che hai impostato nel simulatore qui sopra.</p>
     <div class="imp-grid">
-      <div class="imp fx">
+      <div class="imp imp-a fx">
         <div class="ico" aria-hidden="true">
           <svg viewBox="0 0 64 64" fill="none"><path d="M32 58V34" stroke="#101822" stroke-width="4" stroke-linecap="round"/><path d="M32 40c-9 0-17-7-17-17 0-8 6-15 17-17 11 2 17 9 17 17 0 10-8 17-17 17z" fill="#3AA76A"/><path d="M32 34c-5-1-8-4-9-8" stroke="#1E6B3A" stroke-width="3" stroke-linecap="round"/></svg>
         </div>
@@ -1096,7 +1116,7 @@ footer p{font-size:.85rem;line-height:1.7}
         <h3>Piantati ogni anno, virtualmente</h3>
         <p>La CO₂ che il tuo impianto evita equivale al lavoro annuale di questi alberi adulti.</p>
       </div>
-      <div class="imp fx">
+      <div class="imp imp-km fx">
         <div class="ico" aria-hidden="true">
           <svg viewBox="0 0 64 64" fill="none"><path d="M10 40h44l-6-14c-1-3-3-4-6-4H22c-3 0-5 1-6 4l-6 14z" fill="#101822"/><rect x="8" y="38" width="48" height="12" rx="4" fill="#F4740B"/><circle cx="20" cy="50" r="6" fill="#101822" stroke="#F6F1E6" stroke-width="2"/><circle cx="44" cy="50" r="6" fill="#101822" stroke="#F6F1E6" stroke-width="2"/><path d="M28 20l-3 8M39 20l3 8" stroke="#F5A623" stroke-width="3" stroke-linecap="round"/></svg>
         </div>
@@ -1104,7 +1124,7 @@ footer p{font-size:.85rem;line-height:1.7}
         <h3>Di auto a benzina evitati</h3>
         <p>Le stesse emissioni di questi chilometri percorsi ogni anno con un'auto a benzina.</p>
       </div>
-      <div class="imp fx">
+      <div class="imp imp-co2 fx">
         <div class="ico" aria-hidden="true">
           <svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="24" stroke="#101822" stroke-width="4"/><path d="M32 14v18l12 8" stroke="#F4740B" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
@@ -1791,6 +1811,18 @@ function submitLead(){document.getElementById('formOk').style.display='block'}
 ScrollTrigger.sort();
 ScrollTrigger.refresh();
 window.addEventListener('load',()=>{ScrollTrigger.sort();ScrollTrigger.refresh();});
+
+/* ---------- impact cards: reveal foto su touch ---------- */
+(function impactReveal(){
+  if(window.matchMedia('(hover:hover)').matches) return;   // desktop usa :hover
+  const cards=document.querySelectorAll('.imp');
+  if(!cards.length||!('IntersectionObserver' in window)) return;
+  const io=new IntersectionObserver(es=>{es.forEach(en=>{
+    if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}
+  })},{threshold:.35});
+  cards.forEach(c=>io.observe(c));
+})();
+
 </script>
 </body>
 </html>
