@@ -612,7 +612,7 @@ footer p{font-size:.85rem;line-height:1.7}
   .hero-hud .hh-dot{animation:none}
 }
 /* ============================================
-   VER-2026-07-09-V7 — blocco modifiche v4
+   VER-2026-07-09-V8 — blocco modifiche v4
    ============================================ */
 
 /* clipping discendenti (.tr / footer) */
@@ -691,8 +691,16 @@ footer p{font-size:.85rem;line-height:1.7}
   .gse-step{opacity:1;padding:18px 16px 18px 24px}
 }
 
+/* motion layer v8 — magnetismo, inerzia, profondita' */
+.btn{transition-property:box-shadow,background,color,border-color;will-change:transform}
+.nav-cta{transition-property:border-color,background,color!important;will-change:transform}
+input[type=range]::-webkit-slider-thumb{transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.22)}
+input[type=range]::-moz-range-thumb{transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
+input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
+
 /* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
-body::after{content:'VER-2026-07-09-V7'!important;position:fixed!important;bottom:8px!important;left:8px!important;z-index:99999!important;font:600 11px/1 monospace!important;color:#fff!important;background:#c0392b!important;padding:4px 8px!important;border-radius:4px!important;pointer-events:none!important}
+body::after{content:'VER-2026-07-09-V8'!important;position:fixed!important;bottom:8px!important;left:8px!important;z-index:99999!important;font:600 11px/1 monospace!important;color:#fff!important;background:#c0392b!important;padding:4px 8px!important;border-radius:4px!important;pointer-events:none!important}
 </style>
 </head>
 <body>
@@ -2025,6 +2033,44 @@ if(FX){
   }
 }
 function submitLead(){document.getElementById('formOk').style.display='block'}
+
+/* ---------- 12b. MOTION LAYER — magnetismo + parallasse smorzata ---------- */
+(function motionLayer(){
+  if(!FX)return;
+  if(!window.matchMedia('(hover:hover) and (pointer:fine)').matches)return;
+
+  /* A. magnetismo: i CTA attirano il cursore, rilascio elastico */
+  const mag=el=>{
+    const qx=gsap.quickTo(el,'x',{duration:.5,ease:'power3'}),
+          qy=gsap.quickTo(el,'y',{duration:.5,ease:'power3'});
+    el.addEventListener('mousemove',e=>{const r=el.getBoundingClientRect();
+      qx((e.clientX-r.left-r.width/2)*.28);qy((e.clientY-r.top-r.height/2)*.34);},{passive:true});
+    el.addEventListener('mouseleave',()=>gsap.to(el,{x:0,y:0,duration:.7,ease:'elastic.out(1,.35)',overwrite:'auto'}));
+  };
+  document.querySelectorAll('.btn,.nav-cta').forEach(mag);
+
+  /* B. cursore solare: si dilata sugli elementi interattivi */
+  const cur=document.getElementById('cursor');
+  if(cur)document.querySelectorAll('a,button,input[type=range],.stg-chip,.gse-step').forEach(el=>{
+    el.addEventListener('mouseenter',()=>gsap.to(cur,{scale:2.6,opacity:.5,duration:.3,ease:'power2.out'}));
+    el.addEventListener('mouseleave',()=>gsap.to(cur,{scale:1,opacity:.9,duration:.45,ease:'elastic.out(1,.4)'}));
+  });
+
+  /* C. parallasse a strati: profondita' smorzata, un solo listener */
+  const layers=[];
+  const add=(sel,d)=>document.querySelectorAll(sel).forEach(el=>{
+    layers.push({qx:gsap.quickTo(el,'x',{duration:.9,ease:'power2'}),
+                 qy:gsap.quickTo(el,'y',{duration:.9,ease:'power2'}),d});
+    el.style.willChange='transform';
+  });
+  add('.hero h1',12);add('.hero-badges',16);add('.ctas',9);add('.hero-hud',6);
+  add('.stg-head',10);add('.stg-chips',5);add('.stg-compare',7);
+  add('.arch',9);
+  window.addEventListener('mousemove',e=>{
+    const nx=e.clientX/innerWidth-.5, ny=e.clientY/innerHeight-.5;
+    for(const l of layers){l.qx(nx*l.d);l.qy(ny*l.d*.7);}
+  },{passive:true});
+})();
 
 /* ---------- 13. refresh dopo il load ---------- */
 /* I pin vengono creati nello script in un ordine diverso da quello del
