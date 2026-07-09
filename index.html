@@ -656,6 +656,14 @@ footer p{font-size:.85rem;line-height:1.7}
 .services-head{padding:15px 0 25px!important}
 .services-head h2{margin:5px 0!important}
 .p-tags span{min-height:40px!important;padding:10px 15px!important;display:inline-flex!important;align-items:center!important}
+/* masterclass simulatore */
+.res .val{font-size:1.9rem;color:var(--fiamma)}
+.res.save .val{font-size:2.4rem;color:var(--verde)}
+.res{padding:22px 26px}
+.res-list{will-change:transform;transform-origin:center}
+.slider-hint{display:none}
+.calc-note{font-size:.72rem;margin-top:22px;max-width:48ch}
+.calc .intro{max-width:44ch;font-size:.98rem}
 </style>
 </head>
 <body>
@@ -1962,6 +1970,7 @@ function update(){
   bill.style.setProperty('--fill',((m-50)/450*100)+'%');
   els.billVal.textContent=fmtEur(m);
   const t=compute(m);
+  if(FX){gsap.fromTo('.res-list',{scale:1.02},{scale:1,duration:.45,ease:'power2.out',overwrite:'auto'});}
   if(!FX){Object.assign(state,t);render();return}
   gsap.to(state,{...t,duration:.75,ease:'power3.out',overwrite:true,onUpdate:render});
 }
