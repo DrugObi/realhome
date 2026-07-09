@@ -542,6 +542,12 @@ footer .wrap{display:flex;flex-direction:column;gap:60px} /* separazione geometr
 .flogo .word{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;color:#F6F1E6;letter-spacing:.05em}
 .flogo .word b{color:var(--sole)}
 footer p{font-size:.85rem;line-height:1.7}
+.legal{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px}
+.legal span:first-child{color:#F6F1E6;font-weight:600}
+.legal>*+*::before{content:'·';margin-right:14px;color:var(--line-d)}
+.legal a{color:inherit;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .25s,color .25s}
+.legal a:hover{color:var(--sole);border-bottom-color:var(--sole)}
+.hero-badges b.pct{background:var(--fiamma);color:#fff;padding:2px 8px;border-radius:4px}
 .f-claim{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.35rem;color:#DCE3ED;margin-bottom:18px;line-height:1.35}
 .f-claim b{color:var(--sole);font-style:normal;font-family:'Bricolage Grotesque',sans-serif;font-weight:750}
 .disclaimer{font-size:.74rem!important;opacity:.75;max-width:60ch}
@@ -670,8 +676,8 @@ footer p{font-size:.85rem;line-height:1.7}
     </div>
     <div class="hero-badges">
       <span>✓ Pratica <b>GSE</b> inclusa</span>
-      <span>✓ Detrazione <b>50%</b> fotovoltaico</span>
-      <span>✓ <b>65%</b> infissi e pompe di calore</span>
+      <span>✓ Detrazione <b class="pct">50%</b> fotovoltaico</span>
+      <span>✓ <b class="pct">65%</b> infissi e pompe di calore</span>
     </div>
   </div>
 </header>
@@ -879,7 +885,7 @@ footer p{font-size:.85rem;line-height:1.7}
           <div class="p-tags"><span class="hot">Pratica GSE inclusa</span><span>Detrazione 50%</span><span>Accumulo</span></div>
         </div>
         <div class="p-media">
-          <div class="zoom"><img src="https://d8j0ntlcm91z4.cloudfront.net/user_37wLEcgtT99OWtuf2iqxdzZdDOJ/hf_20260702_211944_56a070a1-3993-4d9d-8d8d-7f0be7f5efb4.png" alt="Pannelli fotovoltaici monocristallini su tetto"></div>
+          <div class="zoom"><img src="servizio1.webp" alt="Pannelli fotovoltaici monocristallini su tetto"></div>
           <div class="m-cap">Pannelli fotovoltaici</div>
         </div>
       </article>
@@ -893,7 +899,7 @@ footer p{font-size:.85rem;line-height:1.7}
           <div class="p-tags"><span class="hot">Detrazione 65%</span><span>Caldo + freddo</span><span>Addio gas</span></div>
         </div>
         <div class="p-media">
-          <div class="zoom"><img loading="lazy" src="https://d8j0ntlcm91z4.cloudfront.net/user_37wLEcgtT99OWtuf2iqxdzZdDOJ/hf_20260702_211244_e21c1895-5d92-4fc0-bb10-332db5aaf294.png" alt="Pompa di calore moderna installata su facciata"></div>
+          <div class="zoom"><img loading="lazy" src="servizio2.webp" alt="Pompa di calore moderna installata su facciata"></div>
           <div class="m-cap">Pompe di calore</div>
         </div>
       </article>
@@ -907,7 +913,7 @@ footer p{font-size:.85rem;line-height:1.7}
           <div class="p-tags"><span class="hot">Detrazione 65% infissi</span><span>Isolamento</span><span>Chiavi in mano</span></div>
         </div>
         <div class="p-media">
-          <div class="zoom"><img loading="lazy" src="https://d8j0ntlcm91z4.cloudfront.net/user_37wLEcgtT99OWtuf2iqxdzZdDOJ/hf_20260702_211251_2d55a016-f03c-481a-8912-34e7944f10e5.png" alt="Soggiorno ristrutturato con nuovi infissi a tutta altezza"></div>
+          <div class="zoom"><img loading="lazy" src="servizio3.webp" alt="Soggiorno ristrutturato con nuovi infissi a tutta altezza"></div>
           <div class="m-cap">Ristrutturazioni e infissi</div>
         </div>
       </article>
@@ -921,7 +927,7 @@ footer p{font-size:.85rem;line-height:1.7}
           <div class="p-tags"><span class="hot">Chiavi in mano</span><span>Classe A4</span><span>Fotovoltaico integrato</span></div>
         </div>
         <div class="p-media">
-          <div class="zoom"><img loading="lazy" src="https://d8j0ntlcm91z4.cloudfront.net/user_37wLEcgtT99OWtuf2iqxdzZdDOJ/hf_20260702_211259_78f15a9e-7e15-4c33-ae10-b4598a5c828b.png" alt="Casa moderna di nuova costruzione con fotovoltaico integrato"></div>
+          <div class="zoom"><img loading="lazy" src="servizio4.webp" alt="Casa moderna di nuova costruzione con fotovoltaico integrato"></div>
           <div class="m-cap">Case da zero</div>
         </div>
       </article>
@@ -1268,7 +1274,13 @@ footer p{font-size:.85rem;line-height:1.7}
       </div>
     </div>
     <div class="footer-bottom">
-      <p>P.IVA 00000000000 · © 2026 REALHOME SRL</p>
+      <p class="legal">
+        <span>RealHome S.r.l.</span>
+        <span>P.IVA 01234567890</span>
+        <span>Via dell'Innovazione, 10 — Modena</span>
+        <a href="mailto:info@realhome.it">info@realhome.it</a>
+        <a href="tel:+39059000000">+39 059 000000</a>
+      </p>
       <p class="disclaimer">Le percentuali di detrazione fiscale indicate sono soggette alla normativa vigente e possono variare in base alla tipologia di immobile e alle leggi di bilancio. Risparmi, dimensionamenti ed equivalenze ambientali sono stime indicative: il calcolo preciso viene fornito con il preventivo personalizzato.</p>
     </div>
   </div>
