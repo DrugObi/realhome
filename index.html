@@ -760,7 +760,7 @@ body.menu-open{overflow:hidden}
 .nav-scrim.show{opacity:1;pointer-events:auto}
 
 /* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
-body::after{content:'VER-2026-07-10-V12';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
+body::after{content:'VER-2026-07-11-V13-1';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 
 /* iter gse — v7 archivio split-screen */
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
@@ -2118,7 +2118,13 @@ if (FX){
   /* target del volo: centro del cassetto i, in coordinate locali di .arch */
   const tgt=i=>{const A=arch.getBoundingClientRect(),D=drawers[i].getBoundingClientRect();
     return {x:D.left-A.left+(D.width-132)/2, y:D.top-A.top+7};};
-  const tl=gsap.timeline({scrollTrigger:{trigger:split,start:'top 12%',end:'+=300%',scrub:1,pin:true,anticipatePin:1,invalidateOnRefresh:true,
+  const tl=gsap.timeline({scrollTrigger:{trigger:split,start:'top 12%',end:'+=300%',scrub:1,pin:true,pinSpacing:true,anticipatePin:1,invalidateOnRefresh:true,
+    onRefreshInit:self=>{
+      /* prima che il pin ricalcoli lo spacer, scarta misure fatte su un layout
+         non ancora assestato (font/immagini tardivi): è ciò che gonfiava lo
+         spacer a "scroll infinito". */
+      self.animation&&self.animation.progress(0);
+    },
     onUpdate:self=>{
       const k=Math.min(3,Math.floor(self.progress*4));
       if(archN.textContent!==NN[k]){archN.textContent=NN[k];
@@ -2654,6 +2660,29 @@ function submitLead(){document.getElementById('formOk').style.display='block'}
 ScrollTrigger.sort();
 ScrollTrigger.refresh();
 window.addEventListener('load',()=>{ScrollTrigger.sort();ScrollTrigger.refresh();});
+/* FIX v13 — i numeri giganti (Bricolage Grotesque) cambiano altezza quando il
+   webfont si monta, DOPO 'load'. Senza questo refresh i pin creati prima (Archivio,
+   Servizi) restano ancorati alla geometria pre-font e si sovrappongono alle sezioni
+   vicine (contatore ↔ Archivio). document.fonts.ready attende il montaggio reale. */
+if(document.fonts&&document.fonts.ready){
+  document.fonts.ready.then(()=>{
+    ScrollTrigger.refresh();
+    /* se siamo ancora in cima (caricamento normale), ri-azzera dopo il refresh:
+       il cambio d'altezza dei numeri giganti può aver spostato tutto di qualche px.
+       Se l'utente ha già scrollato, NON tocchiamo la sua posizione. */
+    if(window.scrollY<4&&window.hardScrollTop)window.hardScrollTop();
+    requestAnimationFrame(()=>ScrollTrigger.refresh());
+  });
+}
+/* FIX v13 — rete anti "scroll infinito": un reflow tardivo (font, immagini)
+   che cambia l'altezza del documento DOPO che i pin sono stati calcolati lascia
+   lo spacer di un pin ancorato a una geometria vecchia → banda vuota gigante.
+   Qui facciamo qualche refresh scaglionato nei primi secondi, quando l'utente
+   è ancora vicino alla cima e un refresh è invisibile. Nessun observer continuo
+   (rischioso: i pin stessi cambiano scrollHeight e innescherebbero un loop). */
+[400,900,1600,2600].forEach(ms=>setTimeout(()=>{
+  if(window.scrollY<window.innerHeight*1.2)ScrollTrigger.refresh();
+},ms));
 
 /* ---------- impact cards: reveal foto su touch ---------- */
 (function impactReveal(){
