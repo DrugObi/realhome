@@ -13,7 +13,19 @@ window.addEventListener('beforeunload',function(){window.scrollTo(0,0);});
 window.addEventListener('pageshow',function(e){
   /* se hardScrollTop esiste già (script principale caricato) usa quello:
      azzera anche lo stato interno di Lenis, non solo lo scroll nativo */
-  if(typeof window.hardScrollTop==='function'){ window.hardScrollTop(); return; }
+  if(typeof window.hardScrollTop==='function'){
+    window.hardScrollTop();
+    /* Restore da bfcache: 'load' NON rifira, quindi il triplo giro
+       (load → rAF → 120ms) che copre i ripristini tardivi qui non esiste.
+       In più il layout dei pin (#gseSplit, Servizi) non ha ancora finito di
+       assestarsi: il refresh fatto dentro hardScrollTop misura trigger su una
+       geometria stale. Ripetiamo la sequenza a layout fermo. */
+    if(e.persisted){
+      requestAnimationFrame(window.hardScrollTop);
+      setTimeout(window.hardScrollTop,120);
+    }
+    return;
+  }
   window.scrollTo(0,0);
   if(window.lenisRef) window.lenisRef.scrollTo(0,{immediate:true,force:true});
 });
@@ -631,34 +643,44 @@ footer p{font-size:.85rem;line-height:1.7}
 .services-head{padding:15px 0 25px!important}
 .services-head h2{margin:5px 0!important}
 
-/* masterclass simulatore — v5 stage */
-.stage{position:relative;background:var(--notte-2);border:1px solid var(--line-d);border-radius:28px;padding:56px 48px 40px;margin-top:34px;overflow:hidden;box-shadow:0 40px 90px -40px rgba(7,12,22,.55)}
-.stage::before{content:'';position:absolute;left:-20%;right:-20%;top:-40%;height:120%;background:radial-gradient(ellipse at 50% 0%,rgba(245,166,35,.15),transparent 60%);pointer-events:none}
-.stg-head{text-align:center;position:relative}
-.stg-lbl{display:block;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-d);font-weight:600;margin-bottom:12px}
-.stg-hero{font-family:'Bricolage Grotesque',sans-serif;font-weight:780;font-size:clamp(3.4rem,8vw,6.4rem);line-height:1;letter-spacing:-.04em;color:var(--sole);font-variant-numeric:tabular-nums;display:inline-block;will-change:transform}
-.stg-sub{display:block;margin-top:14px;color:var(--muted-d);font-size:.95rem}
+/* ── v9. simulatore "LA CASA D'ORO" — ora d'oro interattiva ──
+   La scena SVG è parametrica: pannelli e fotoni li genera il JS (blocco 12).
+   .stg-head-in esiste per la mina n.2: la parallasse (12b) muove .stg-head,
+   l'ingresso muove il wrapper interno. Mai la stessa proprietà a due sistemi. */
+.stage{position:relative;background:var(--notte-2);border:1px solid var(--line-d);border-radius:28px;margin-top:34px;overflow:hidden;box-shadow:0 40px 90px -40px rgba(7,12,22,.55)}
+.sim-scene{position:relative;display:block}
+#simSvg{display:block;width:100%;height:auto}
+#simSvg .tb{transform-box:fill-box;transform-origin:center}
+.stg-head{position:absolute;top:clamp(16px,3.6vw,42px);left:clamp(18px,4vw,48px);z-index:2;text-align:left;pointer-events:none}
+.stg-lbl{display:block;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-d);font-weight:600;margin-bottom:10px}
+.stg-hero{font-family:'Bricolage Grotesque',sans-serif;font-weight:780;font-size:clamp(2.5rem,5.6vw,5.2rem);line-height:1;letter-spacing:-.04em;color:var(--sole);font-variant-numeric:tabular-nums;display:inline-block;will-change:transform;text-shadow:0 4px 40px rgba(7,12,22,.6)}
+.stg-sub{display:block;margin-top:12px;color:var(--muted-d);font-size:.95rem}
 .stg-bill{color:var(--giorno);font-variant-numeric:tabular-nums}
-.stg-slider{position:relative;margin:46px auto 6px;max-width:640px}
+.sim-deck{position:relative;padding:30px clamp(20px,4vw,48px) 38px}
+.stg-slider{position:relative;margin:4px auto 4px;max-width:640px}
 .stg-slider input[type=range]{-webkit-appearance:none;appearance:none;display:block;width:100%;height:14px;border-radius:100px;background:linear-gradient(90deg,var(--sole) var(--fill,15%),rgba(255,255,255,.12) var(--fill,15%));outline:none;border:none;margin:0}
 .stg-slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:38px;height:38px;border-radius:50%;background:var(--giorno);border:4px solid var(--sole);box-shadow:0 0 0 8px rgba(245,166,35,.14),0 6px 18px rgba(0,0,0,.4);cursor:grab}
 .stg-slider input[type=range]::-webkit-slider-thumb:active{cursor:grabbing}
 .stg-slider input[type=range]::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:var(--giorno);border:4px solid var(--sole);box-shadow:0 0 0 8px rgba(245,166,35,.14),0 6px 18px rgba(0,0,0,.4);cursor:grab}
-.stg-orb{position:absolute;top:-48px;left:15.5%;width:26px;height:26px;margin-left:-13px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FFD98A,var(--sole));box-shadow:0 0 26px rgba(245,166,35,.85);pointer-events:none;will-change:transform}
 .stg-range{display:flex;justify-content:space-between;margin-top:12px;font-size:.75rem;color:var(--muted-d)}
-.stg-compare{display:flex;justify-content:center;gap:14px;margin:32px 0 6px;flex-wrap:wrap}
-.cmp{display:flex;flex-direction:column;gap:4px;align-items:center;padding:12px 24px;border-radius:14px;border:1px solid var(--line-d);min-width:160px}
+.stg-hint{text-align:center;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted-d);margin-top:16px}
+.stg-compare{display:flex;justify-content:center;gap:14px;margin:30px 0 6px;flex-wrap:wrap}
+.cmp{display:flex;flex-direction:column;gap:4px;align-items:center;padding:12px 24px;border-radius:14px;border:1px solid var(--line-d);background:rgba(255,255,255,.03);min-width:160px}
 .cmp-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted-d);font-weight:600}
 .cmp b{font-size:1.05rem;color:var(--giorno);font-variant-numeric:tabular-nums}
 .cmp-new{background:rgba(58,167,106,.12);border-color:rgba(58,167,106,.35)}
 .cmp-new b{color:var(--verde)}
-.stg-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:28px}
+.stg-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:26px}
 .stg-chip{background:rgba(255,255,255,.04);border:1px solid var(--line-d);border-radius:16px;padding:16px 18px;text-align:center;will-change:transform}
 .stg-chip .lblc{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted-d);font-weight:600;margin-bottom:6px}
 .stg-chip b{font-family:'Bricolage Grotesque',sans-serif;font-weight:780;font-size:1.25rem;color:var(--giorno);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .stg-note{margin:28px auto 0;max-width:60ch;text-align:center;font-size:.7rem;color:var(--muted-d);line-height:1.6}
-@media(max-width:980px){.stage{padding:40px 22px 30px}.stg-chips{grid-template-columns:repeat(2,1fr)}.stg-orb{top:-42px}}
-@media(max-width:560px){.stg-chips{grid-template-columns:1fr}.stg-hero{font-size:clamp(2.8rem,14vw,3.6rem)}.cmp{min-width:130px;padding:10px 16px}}
+@media(max-width:980px){.stg-chips{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){.stg-head{position:static;text-align:center;padding:26px 18px 0;pointer-events:auto}.stg-hero{font-size:clamp(2.6rem,12vw,3.6rem)}.sim-deck{padding-top:22px}}
+@media(max-width:560px){.stg-chips{grid-template-columns:1fr}.cmp{min-width:130px;padding:10px 16px}}
+
+/* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
+body::after{content:'VER-2026-07-10-V9';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 
 /* iter gse — v7 archivio split-screen */
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
@@ -699,8 +721,6 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.22)}
 input[type=range]::-moz-range-thumb{transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
 input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
 
-/* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
-body::after{content:'VER-2026-07-09-V8'!important;position:fixed!important;bottom:8px!important;left:8px!important;z-index:99999!important;font:600 11px/1 monospace!important;color:#fff!important;background:#c0392b!important;padding:4px 8px!important;border-radius:4px!important;pointer-events:none!important}
 </style>
 </head>
 <body>
@@ -1189,33 +1209,86 @@ body::after{content:'VER-2026-07-09-V8'!important;position:fixed!important;botto
   </div>
 </section>
 
-<!-- H 17:30 · simulatore -->
+<!-- H 17:30 · simulatore "La Casa d'Oro" -->
 <section class="calc day" id="risparmio" data-theme="giorno">
   <div class="wrap">
     <span class="kicker fx"><span class="ora">H 17:30</span><span class="sep">·</span>Fai i conti</span>
-    <h2 class="tr">Il tuo impianto, <em>calcolato in tempo reale.</em></h2>
-    <div class="stage fx" id="stage">
-      <div class="stg-head" role="status" aria-live="polite">
-        <span class="stg-lbl">Risparmio annuo stimato</span>
-        <div class="stg-hero" id="saveY">1.224 €</div>
-        <span class="stg-sub">con una bolletta di <b class="stg-bill" id="billVal">120 €</b> al mese</span>
+    <h2 class="tr">Muovi la bolletta. <em>Il tetto risponde.</em></h2>
+    <div class="stage" id="stage">
+      <div class="sim-scene">
+        <svg id="simSvg" viewBox="0 0 1200 560" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <defs>
+            <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#141D33"/><stop offset=".45" stop-color="#3D3552"/>
+              <stop offset=".78" stop-color="#A05A2C"/><stop offset="1" stop-color="#F5A623"/>
+            </linearGradient>
+            <radialGradient id="sunG" cx=".38" cy=".38" r=".75">
+              <stop offset="0" stop-color="#FFE9BC"/><stop offset=".55" stop-color="#FFD98A"/><stop offset="1" stop-color="#F5A623"/>
+            </radialGradient>
+            <linearGradient id="pvG" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#2C4C7A"/><stop offset=".5" stop-color="#16305C"/><stop offset="1" stop-color="#0E2140"/>
+            </linearGradient>
+            <linearGradient id="winG" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#FFD98A"/><stop offset="1" stop-color="#F4740B"/>
+            </linearGradient>
+            <filter id="sunBlur" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="18"/></filter>
+          </defs>
+          <!-- cielo dell'ora d'oro -->
+          <rect x="0" y="0" width="1200" height="432" fill="url(#skyG)"/>
+          <!-- il sole: tre gusci annidati. sunPos=ingresso · sunSize=energia · sunBreath=respiro.
+               Tre sistemi, tre proprietà, zero conflitti (lezione dell'Archivio). -->
+          <g id="sunPos"><g id="sunSize" class="tb"><g id="sunBreath" class="tb">
+            <circle cx="985" cy="330" r="88" fill="#F5A623" opacity=".26" filter="url(#sunBlur)"/>
+            <circle cx="985" cy="330" r="44" fill="url(#sunG)"/>
+          </g></g></g>
+          <!-- terra: stesso colore del deck, la scena continua sotto -->
+          <rect x="0" y="430" width="1200" height="130" fill="var(--notte-2)"/>
+          <line x1="0" y1="430" x2="1200" y2="430" stroke="rgba(245,166,35,.3)" stroke-width="1.5"/>
+          <!-- la casa, ¾ di profilo, silhouette calda -->
+          <g id="house">
+            <polygon points="760,336 856,318 856,430 760,430" fill="#15223E"/>
+            <rect x="240" y="336" width="520" height="94" fill="#0F1930"/>
+            <g id="winGlow" opacity=".25">
+              <rect x="300" y="360" width="58" height="44" rx="3" fill="url(#winG)"/>
+              <rect x="410" y="360" width="58" height="44" rx="3" fill="url(#winG)"/>
+            </g>
+            <rect x="640" y="362" width="50" height="68" rx="3" fill="#0B1526"/>
+            <polygon points="232,338 768,338 866,194 330,194" fill="#101C36" stroke="rgba(255,255,255,.10)" stroke-width="1.5"/>
+          </g>
+          <!-- pannelli: slot fantasma + moduli accesi, generati dal JS (blocco 12) -->
+          <g id="pvGhost"></g>
+          <g id="pvLit"></g>
+          <!-- fotoni: dal sole al tetto, densità legata ai kW -->
+          <g id="photons"></g>
+          <!-- sipario notturno: l'ingresso in scrub lo dissolve rivelando l'ora d'oro -->
+          <rect id="skyShade" x="0" y="0" width="1200" height="560" fill="var(--notte-2)" opacity="0"/>
+        </svg>
+        <div class="stg-head" role="status" aria-live="polite">
+          <div class="stg-head-in">
+            <span class="stg-lbl">Risparmio annuo stimato</span>
+            <div class="stg-hero" id="saveY">1.224 €</div>
+            <span class="stg-sub">con una bolletta di <b class="stg-bill" id="billVal">120 €</b> al mese</span>
+          </div>
+        </div>
       </div>
-      <div class="stg-slider">
-        <div class="stg-orb" id="stgOrb" aria-hidden="true"></div>
-        <input type="range" id="bill" min="50" max="500" step="10" value="120" aria-label="Bolletta elettrica mensile in euro">
-        <div class="stg-range" aria-hidden="true"><span>50 €</span><span>500 €</span></div>
+      <div class="sim-deck">
+        <div class="stg-slider">
+          <input type="range" id="bill" min="50" max="500" step="10" value="120" aria-label="Bolletta elettrica mensile in euro">
+          <div class="stg-range" aria-hidden="true"><span>50 €</span><span>500 €</span></div>
+          <div class="stg-hint" id="stgHint" aria-hidden="true">◂&#8195;Trascina la tua bolletta&#8195;▸</div>
+        </div>
+        <div class="stg-compare">
+          <div class="cmp"><span class="cmp-lbl">Oggi</span><b id="barOld">1.440 €/anno</b></div>
+          <div class="cmp cmp-new"><span class="cmp-lbl">Con REALHOME</span><b id="barNew">216 €/anno</b></div>
+        </div>
+        <div class="stg-chips">
+          <div class="stg-chip"><span class="lblc">Pannelli consigliati</span><b><span id="nPanels">9</span> × 450 W</b></div>
+          <div class="stg-chip"><span class="lblc">Potenza impianto</span><b id="kwVal">4 kW</b></div>
+          <div class="stg-chip"><span class="lblc">Risparmio in 20 anni</span><b id="save20">24.480 €</b></div>
+          <div class="stg-chip"><span class="lblc">CO₂ evitata ogni anno</span><b id="co2Val">1,4 t</b></div>
+        </div>
+        <p class="stg-note">Stime indicative: prezzo energia 0,30 €/kWh, resa 1.200 kWh/kWp anno, pannelli da 450 W, autoconsumo medio 85%. Il dimensionamento preciso arriva col sopralluogo gratuito.</p>
       </div>
-      <div class="stg-compare">
-        <div class="cmp"><span class="cmp-lbl">Oggi</span><b id="barOld">1.440 €/anno</b></div>
-        <div class="cmp cmp-new"><span class="cmp-lbl">Con REALHOME</span><b id="barNew">216 €/anno</b></div>
-      </div>
-      <div class="stg-chips">
-        <div class="stg-chip"><span class="lblc">Pannelli consigliati</span><b><span id="nPanels">7</span> × 450 W</b></div>
-        <div class="stg-chip"><span class="lblc">Potenza impianto</span><b id="kwVal">3,3 kW</b></div>
-        <div class="stg-chip"><span class="lblc">Risparmio in 20 anni</span><b id="save20">24.480 €</b></div>
-        <div class="stg-chip"><span class="lblc">CO₂ evitata ogni anno</span><b id="co2Val">1,4 t</b></div>
-      </div>
-      <p class="stg-note">Stime indicative: prezzo energia 0,30 €/kWh, resa 1.200 kWh/kWp anno, pannelli da 450 W, autoconsumo medio 85%. Il dimensionamento preciso arriva col sopralluogo gratuito.</p>
     </div>
   </div>
 </section>
@@ -1973,7 +2046,10 @@ if (FX){
   });
 }
 
-/* ---------- 12. simulatore + impatto ---------- */
+/* ---------- 12. simulatore "LA CASA D'ORO" + impatto ----------
+   NERVI (intoccabili, letti anche dalle card Impatto): state, compute(),
+   render(), els e gli ID bill/billVal/saveY/save20/nPanels/kwVal/co2Val/
+   barOld/barNew. Tutto il resto è pelle v9. */
 const bill=document.getElementById('bill');
 const PRICE=0.30, YIELD=1200, PANEL_W=0.45, SELF=0.85, CO2_KWH=0.35, TREE_KG=20, CAR_KG_KM=0.12;
 const fmtEur=n=>Math.round(n).toLocaleString('it-IT')+' €';
@@ -1999,16 +2075,94 @@ function compute(m){
   const saveY=y*SELF, pv=y-saveY, co2kg=kwh*SELF*CO2_KWH;
   return {y,pv,saveY,save20:saveY*20,panels,kw,co2:co2kg/1000,trees:co2kg/TREE_KG,km:co2kg/CAR_KG_KM};
 }
-const stgOrb=E('stgOrb');
+
+/* — la scena: tetto parametrico, sole, fotoni —
+   Il tetto è un parallelogramma (vista ¾): 13×3 = 39 slot, il massimo reale
+   è 38 pannelli (bolletta 500 €). Ogni slot ha un fantasma (il potenziale)
+   e un modulo acceso che nasce con pop elastico quando i dati lo chiamano. */
+const simSvg=E('simSvg');
+const pvCells=[], photons=[];
+let pvLitN=0;
+(function buildScene(){
+  if(!simSvg) return;
+  const NS='http://www.w3.org/2000/svg';
+  const eL=[258,326], Uv=[494,0], Vv=[94,-124], COLS=13, ROWS=3, G=.09;
+  const P=(u,v)=>[eL[0]+Uv[0]*u/COLS+Vv[0]*v/ROWS, eL[1]+Uv[1]*u/COLS+Vv[1]*v/ROWS];
+  const pts=(i,j)=>[P(i+G,j+G),P(i+1-G,j+G),P(i+1-G,j+1-G),P(i+G,j+1-G)]
+    .map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  const ghost=E('pvGhost'), litG=E('pvLit');
+  for(let j=0;j<ROWS;j++)for(let i=0;i<COLS;i++){
+    const gp=document.createElementNS(NS,'polygon');
+    gp.setAttribute('points',pts(i,j));
+    gp.setAttribute('fill','none');gp.setAttribute('stroke','rgba(255,255,255,.10)');
+    ghost.appendChild(gp);
+    const lp=document.createElementNS(NS,'polygon');
+    lp.setAttribute('points',pts(i,j));
+    lp.setAttribute('fill','url(#pvG)');lp.setAttribute('stroke','rgba(255,217,138,.35)');
+    lp.setAttribute('class','tb');
+    litG.appendChild(lp);
+    gsap.set(lp,{scale:0,opacity:0});
+    pvCells.push(lp);
+  }
+  /* fotoni: 12 grani di luce, sole → tetto, in loop; quanti ne viaggiano
+     lo decide setEnergy. Niente filtri sui nodi in moto (costano). */
+  const sun=[985,330], targets=[[520,300],[610,262],[700,238]];
+  const ph=E('photons');
+  for(let i=0;i<12;i++){
+    const c=document.createElementNS(NS,'circle');
+    c.setAttribute('r',(2.2+Math.random()*1.6).toFixed(1));
+    c.setAttribute('fill','#FFD98A');c.setAttribute('opacity','0');
+    ph.appendChild(c);
+    const t=targets[i%3], jx=(Math.random()-.5)*44, jy=(Math.random()-.5)*26, dur=1.1+Math.random()*.9;
+    const tl=gsap.timeline({repeat:-1,delay:Math.random()*1.6,paused:true});
+    tl.fromTo(c,{attr:{cx:sun[0]+jx*.35,cy:sun[1]+jy*.35},opacity:0},{opacity:.85,duration:.18,ease:'none'},0)
+      .to(c,{attr:{cx:t[0]+jx,cy:t[1]+jy},duration:dur,ease:'none'},0)
+      .to(c,{opacity:0,duration:.22,ease:'none'},dur-.22);
+    photons.push({tl,c});
+  }
+})();
+function setPanels(n,animate){
+  n=Math.min(n,pvCells.length);
+  if(n===pvLitN) return;
+  if(n>pvLitN){
+    for(let k=pvLitN;k<n;k++){const c=pvCells[k];
+      if(animate&&FX) gsap.fromTo(c,{scale:0,opacity:0},{scale:1,opacity:1,duration:.55,ease:'back.out(2.4)',delay:(k-pvLitN)*.022,overwrite:'auto'});
+      else gsap.set(c,{scale:1,opacity:1});}
+  }else{
+    for(let k=n;k<pvLitN;k++){const c=pvCells[k];
+      if(animate&&FX) gsap.to(c,{scale:0,opacity:0,duration:.3,ease:'power3.in',delay:(pvLitN-1-k)*.012,overwrite:'auto'});
+      else gsap.set(c,{scale:0,opacity:0});}
+  }
+  pvLitN=n;
+}
+function setEnergy(frac){
+  if(!simSvg) return;
+  gsap.to('#sunSize',{scale:.92+frac*.36,duration:FX?.8:0,ease:'power3.out',overwrite:'auto'});
+  gsap.to('#winGlow',{opacity:.25+frac*.75,duration:FX?.6:0,ease:'power2.out',overwrite:'auto'});
+  if(FX){
+    const n=3+Math.round(frac*9);
+    photons.forEach((p,i)=>{
+      if(i<n){if(p.tl.paused())p.tl.play();}
+      else{p.tl.pause();gsap.set(p.c,{opacity:0});}
+    });
+  }
+}
+let hintGone=false;
+function hideHint(){
+  if(hintGone)return;hintGone=true;
+  const h=E('stgHint');
+  if(h){gsap.killTweensOf(h);gsap.to(h,{opacity:0,duration:.5,onComplete:()=>h.remove()});}
+}
 function update(){
   const m=+bill.value, fill=(m-50)/450*100;
   bill.style.setProperty('--fill',fill+'%');
-  if(stgOrb)stgOrb.style.left=fill+'%';
   els.billVal.textContent=fmtEur(m);
   const t=compute(m);
+  setPanels(t.panels,FX);
+  setEnergy(fill/100);
   if(FX){
-    gsap.fromTo('#saveY',{scale:1.05},{scale:1,duration:.9,ease:'elastic.out(1,.35)',overwrite:'auto'});
-    gsap.fromTo('#stgOrb',{scaleX:1.45,scaleY:.65},{scaleX:1,scaleY:1,duration:.8,ease:'elastic.out(1.2,.4)',overwrite:'auto'});
+    hideHint();
+    gsap.fromTo('#saveY',{scale:1.06},{scale:1,duration:.9,ease:'elastic.out(1,.35)',overwrite:'auto'});
     gsap.fromTo('.stg-chip',{y:7},{y:0,duration:.75,ease:'elastic.out(1,.5)',stagger:.045,overwrite:'auto'});
   }
   if(!FX){Object.assign(state,t);render();return}
@@ -2018,12 +2172,33 @@ Object.assign(state,compute(120));
 bill.style.setProperty('--fill',((120-50)/450*100)+'%');
 render();
 bill.addEventListener('input',update);
-if(stgOrb)stgOrb.style.left=((120-50)/450*100)+'%';
-/* stage: entrata a cascata + micro-magnetismo chip */
-if(FX){
-  gsap.from('.stg-hero',{scale:.85,opacity:0,duration:1,ease:'elastic.out(1,.45)',scrollTrigger:{trigger:'#stage',start:'top 78%',once:true}});
-  gsap.from('.stg-compare .cmp',{y:18,opacity:0,duration:.6,ease:'power3.out',stagger:.1,scrollTrigger:{trigger:'#stage',start:'top 75%',once:true}});
-  gsap.from('.stg-chip',{y:26,opacity:0,duration:.7,ease:'power3.out',stagger:.08,scrollTrigger:{trigger:'#stage',start:'top 72%',once:true}});
+
+/* — coreografia d'ingresso —
+   FX: sipario che si dissolve in scrub mentre il sole sorge da dietro
+   l'orizzonte (eco dell'alba), poi — una volta sola — la cascata dei
+   pannelli e la risalita del deck. La parallasse di 12b possiede x/y di
+   .stg-head/.stg-chips/.stg-compare: qui si animano SOLO wrapper interni
+   o figli (.stg-head-in, .cmp, .stg-chip). */
+if(FX && simSvg){
+  gsap.set('#skyShade',{opacity:1});
+  const build=gsap.timeline({
+    scrollTrigger:{trigger:'#stage',start:'top 88%',end:'top 32%',scrub:1},
+    defaults:{ease:'none'}
+  });
+  build
+    .to('#skyShade',{opacity:0,duration:.6},0)
+    .fromTo('#sunPos',{y:170},{y:0,duration:.75},0)
+    .fromTo('#pvGhost',{opacity:0},{opacity:1,duration:.3},.45)
+    .fromTo('.stg-head-in',{y:26,opacity:0},{y:0,opacity:1,duration:.35},.4)
+    .fromTo('.sim-deck',{opacity:0},{opacity:1,duration:.4},.55);
+  ScrollTrigger.create({trigger:'#stage',start:'top 55%',once:true,onEnter:()=>{
+    setPanels(state.panels,true);
+    gsap.fromTo('#saveY',{scale:.88},{scale:1,duration:1,ease:'elastic.out(1,.45)',overwrite:'auto'});
+    gsap.from('.stg-compare .cmp',{y:18,opacity:0,duration:.6,ease:'power3.out',stagger:.1});
+    gsap.from('.stg-chip',{y:26,opacity:0,duration:.7,ease:'power3.out',stagger:.08});
+  }});
+  gsap.to('#sunBreath',{scale:1.05,yoyo:true,repeat:-1,duration:3.2,ease:'sine.inOut'});
+  gsap.to('#stgHint',{opacity:.35,yoyo:true,repeat:-1,duration:1.1,ease:'sine.inOut'});
   if(window.matchMedia('(hover:hover)').matches){
     document.querySelectorAll('.stg-chip').forEach(ch=>{
       ch.addEventListener('mousemove',e=>{const r=ch.getBoundingClientRect();
@@ -2031,7 +2206,12 @@ if(FX){
       ch.addEventListener('mouseleave',()=>gsap.to(ch,{x:0,y:0,duration:.6,ease:'elastic.out(1,.4)',overwrite:'auto'}));
     });
   }
+}else if(simSvg){
+  /* scena compiuta: ora d'oro piena, pannelli montati, niente moto */
+  gsap.set('#skyShade',{opacity:0});
+  setPanels(state.panels,false);
 }
+setEnergy(((120-50)/450));
 function submitLead(){document.getElementById('formOk').style.display='block'}
 
 /* ---------- 12b. MOTION LAYER — magnetismo + parallasse smorzata ---------- */
