@@ -2871,6 +2871,29 @@ document.querySelectorAll('[data-theme]').forEach(sec=>{
     const dist=()=>track.scrollWidth-window.innerWidth;
 
     let lastI=-1;
+    /* ── v17. SNAP MAGNETICO ──
+       Il difetto percepito: con lo scroll morbido ci si ferma A METÀ tra due
+       pannelli e la vetrina sembra rotta. Cura: quando lo scroll si posa
+       (140ms di quiete), il pannello più vicino ti AGGANCIA con una
+       decelerazione cubica. Lo snap passa da Lenis (mai due mani sullo
+       stesso scroll: niente lotta col wheel; un nuovo gesto lo interrompe
+       nativamente). Con reduced-motion non si aggancia nulla. */
+    let snapT=null,snapping=false;
+    const trySnap=self=>{
+      if(!self.isActive||reduceMotion)return;
+      const n=panels.length-1, p=self.progress;
+      const tp=Math.round(p*n)/n;
+      if(Math.abs(p-tp)<.004)return;                    /* già su un pannello */
+      const target=self.start+(self.end-self.start)*tp;
+      snapping=true;
+      if(window.lenisRef){
+        window.lenisRef.scrollTo(target,{duration:.75,easing:t=>1-Math.pow(1-t,3),
+          onComplete:()=>{snapping=false}});
+      }else{
+        window.scrollTo({top:target,behavior:'smooth'});
+        snapping=false;
+      }
+    };
     const tween=gsap.to(track,{
       x:()=>-dist(),
       ease:'none',
@@ -2882,6 +2905,8 @@ document.querySelectorAll('[data-theme]').forEach(sec=>{
         end:()=>'+='+dist(),
         invalidateOnRefresh:true,
         anticipatePin:1,
+        onLeave:()=>clearTimeout(snapT),
+        onLeaveBack:()=>clearTimeout(snapT),
         onUpdate:self=>{
           bar.style.transform=`scaleX(${self.progress})`;
           const i=Math.min(panels.length-1,Math.round(self.progress*(panels.length-1)));
@@ -2890,6 +2915,8 @@ document.querySelectorAll('[data-theme]').forEach(sec=>{
             /* il contatore "scatta" come un tachimetro a ogni pannello */
             gsap.fromTo(count,{yPercent:55,opacity:0},{yPercent:0,opacity:1,duration:.35,ease:'power2.out',overwrite:'auto'});
           }
+          clearTimeout(snapT);
+          if(!snapping)snapT=setTimeout(()=>trySnap(self),140);
         }
       }
     });
@@ -2946,17 +2973,20 @@ document.querySelectorAll('[data-theme]').forEach(sec=>{
 
     /* — velocity skew: le cornici si inclinano con la furia dello scroll
          e si raddrizzano con una molla (stessa fisica dei marquee).
-         skewX vive SOLO qui: nessun altro tween tocca transform delle .p-media — */
+         v17: lavora SOLO quando la vetrina è pinnata (efficienza); fuori,
+         appena la molla si è scaricata, il tick esce subito. — */
     let sk=0;
     const skewTick=()=>{
-      const v=gsap.utils.clamp(-46,46,scrollVel||0);
+      const active=tween.scrollTrigger&&tween.scrollTrigger.isActive;
+      if(!active&&Math.abs(sk)<.01)return;
+      const v=active?gsap.utils.clamp(-46,46,scrollVel||0):0;
       sk+=((v*.075)-sk)*.1;
-      if(Math.abs(sk)<.01&&Math.abs(v)<.01)return;
       gsap.set(medias,{skewX:sk,force3D:true});
     };
     gsap.ticker.add(skewTick);
 
     return ()=>{
+      clearTimeout(snapT);
       gsap.ticker.remove(skewTick);
       medias.forEach(m=>gsap.set(m,{clearProps:'clipPath,transform'}));
       imgs.forEach(i=>gsap.set(i,{clearProps:'transform'}));
