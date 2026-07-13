@@ -131,12 +131,10 @@ body.fxon #cursor{display:block}
 .hero{position:relative;min-height:100svh;background:radial-gradient(120% 90% at 50% -10%, #0D1930 0%, var(--notte) 55%);display:flex;flex-direction:column;justify-content:center;overflow:hidden;padding:140px 0 0}
 
 .hero .wrap{position:relative;z-index:2}
-.hero .kicker{margin-bottom:20px}
 /* v15 — gerarchia ricomposta: il claim bianco si spezza in modo bilanciato,
    l'inciso in serif vive su una riga propria, mai orfani a fine riga */
 .hero h1{font-size:clamp(2.8rem,6.6vw,5.8rem);line-height:1.04;letter-spacing:-.015em;color:#F6F1E6;max-width:19ch;text-wrap:balance}
 .hero h1 em{display:block;margin-top:.1em;font-size:.9em;color:var(--sole)}
-.hero p.lead{margin:26px 0 34px;font-size:1.12rem;line-height:1.65;color:var(--muted-d);max-width:52ch;text-wrap:pretty}
 .ctas{display:flex;gap:14px;flex-wrap:wrap}
 .btn{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:16px 30px;border-radius:100px;font-family:'Instrument Sans',sans-serif;font-weight:600;font-size:.98rem;text-decoration:none;border:none;cursor:pointer;transition:transform .35s var(--ease),box-shadow .35s var(--ease),background .3s,color .3s;overflow:hidden}
 .btn span{position:relative;z-index:1}
@@ -148,12 +146,6 @@ body.fxon #cursor{display:block}
 .btn-ink{background:var(--ink);color:var(--giorno)}
 .btn-ink:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(16,24,34,.22)}
 
-
-
-
-.hero-badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:30px}
-.hero-badges span{font-size:.82rem;font-weight:500;color:#EDEAE0;background:rgba(7,12,22,.55);border:1px solid var(--line-d);backdrop-filter:blur(10px);padding:9px 16px;border-radius:100px}
-.hero-badges b{color:var(--sole);font-weight:700}
 
 
 
@@ -657,7 +649,6 @@ footer .wrap{position:relative;z-index:2;display:flex;flex-direction:column;gap:
 .sunrise:hover .sunrise-arrow{transform:translateY(-3px)}
 .sunrise.rising .sunrise-sun{transform:translateY(-40px);filter:drop-shadow(0 0 26px rgba(245,166,35,.85))}
 .sunrise.rising .sunrise-rays{opacity:1}
-.hero-badges b.pct{background:var(--fiamma);color:#fff;padding:2px 8px;border-radius:4px}
 
 /* ---- utilità reveal ---- */
 .fx{will-change:transform,opacity}
@@ -726,7 +717,6 @@ footer .wrap{position:relative;z-index:2;display:flex;flex-direction:column;gap:
 @media (max-width:560px){
   .wrap{padding:0 16px}
   .hero h1{font-size:clamp(2.5rem,11.5vw,3rem)}
-  .hero-badges{padding:0 16px 20px;gap:8px}
   .badge{font-size:.7rem;padding:8px 12px}
   .kicker{font-size:.68rem;letter-spacing:.16em}
   .band{padding:48px 2px 54px}
@@ -887,7 +877,7 @@ body.menu-open{overflow:hidden}
 .nav-scrim.show{opacity:1;pointer-events:auto}
 
 /* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
-body::after{content:'VER-2026-07-11-V15-3';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
+body::after{content:'VER-2026-07-13-V17';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 
 /* iter gse — v7 archivio split-screen */
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
@@ -989,6 +979,26 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
    ciò che parte nascosto in attesa di GSAP, così il sito resta leggibile — */
 .no-anim .tr .mask,.no-anim .fx{opacity:1!important;transform:none!important}
 .no-anim .imp-ch,.no-anim .gse-step{opacity:1!important;visibility:visible!important;transform:none!important}
+
+/* ============================================
+   VER-2026-07-13-V17 — HERO MAGAZINE
+   Minimalismo estremo: tre livelli (claim / inciso / gesto),
+   il resto è spazio negativo. Il testo galleggia.
+   ============================================ */
+/* L1 — il claim: imponente, tracking editoriale stretto */
+.hero h1{font-size:clamp(3.2rem,8vw,7.4rem);line-height:1.01;letter-spacing:-.028em;max-width:13ch}
+/* L2 — l'inciso: serif, sottile, vive di suo */
+.hero-sub{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:var(--sole);font-size:clamp(1.7rem,3.4vw,3.1rem);line-height:1.15;letter-spacing:.012em;margin:30px 0 0;max-width:20ch}
+/* L3 — il gesto: unica cosa che salta all'occhio oltre al testo */
+.hero .ctas{margin-top:8vh}
+/* aria: il blocco galleggia leggermente alto rispetto al centro ottico */
+.hero .hero-copy{padding:4vh 0 12vh}
+@media (max-width:980px){
+  .hero h1{font-size:clamp(2.5rem,11.5vw,3.4rem);letter-spacing:-.02em}
+  .hero-sub{font-size:clamp(1.35rem,5.8vw,1.9rem);margin-top:20px}
+  .hero .ctas{margin-top:44px}
+  .hero .hero-copy{padding:2vh 0 8vh}
+}
 
 </style>
 </head>
@@ -1226,17 +1236,10 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
     <div class="hh-lbl">La batteria alimenta la casa</div>
   </div>
   <div class="wrap hero-copy">
-    <span class="kicker fx"><span class="ora">H 03:47</span><span class="sep">·</span>Fotovoltaico · Pompe di calore · Ristrutturazioni · Case da zero</span>
-    <h1 class="tr">Il sole non manda bollette. <em>Il tuo tetto nemmeno.</em></h1>
-    <p class="lead fx">Sono le 3 di notte e questa casa va avanti con l'energia raccolta ieri. Fotovoltaico chiavi in mano: pratica GSE inclusa, detrazione fiscale del 50%. Tu accendi la luce, al resto pensiamo noi.</p>
+    <h1 class="tr">Il sole non manda bollette.</h1>
+    <p class="hero-sub tr">Il tuo tetto nemmeno.</p>
     <div class="ctas fx">
       <a class="btn btn-accent" href="#preventivo" data-nav><span>Richiedi il preventivo gratuito</span></a>
-      <a class="btn btn-ghost" href="#risparmio" data-nav><span>Calcola il tuo risparmio</span></a>
-    </div>
-    <div class="hero-badges fx">
-      <span>✓ Pratica <b>GSE</b> inclusa</span>
-      <span>✓ Detrazione <b class="pct">50%</b> fotovoltaico</span>
-      <span>✓ <b class="pct">65%</b> infissi e pompe di calore</span>
     </div>
   </div>
   <div class="hero-cue" aria-hidden="true"><i></i>Scorri</div>
@@ -3447,7 +3450,7 @@ function submitLead(){
                  qy:gsap.quickTo(el,'y',{duration:.9,ease:'power2'}),d});
     el.style.willChange='transform';
   });
-  add('.hero h1',12);add('.hero-badges',16);add('.ctas',9);add('.hero-hud',6);
+  add('.hero h1',12);add('.hero-sub',14);add('.ctas',9);add('.hero-hud',6);
   add('#heroSky',3);add('#heroMid',7);add('#heroFg',13);
   add('.stg-head',10);add('.stg-chips',5);add('.stg-compare',7);
   add('.arch',9);
