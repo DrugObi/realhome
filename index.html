@@ -104,7 +104,8 @@ body.fxon #cursor{display:block}
 /* ============================================================
    NAV — vive di notte, si veste di giorno
    ============================================================ */
-#nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 0;transition:padding .45s var(--ease),background .45s var(--ease),border-color .45s var(--ease)}
+#nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:22px 0;transition:padding .45s var(--ease),background .45s var(--ease),border-color .45s var(--ease),transform .3s ease-out;will-change:transform}
+#nav.nav-hidden{transform:translateY(-100%)}
 #nav .wrap{display:flex;align-items:center;justify-content:space-between;max-width:1320px}
 #nav .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#F6F1E6;transition:color .45s var(--ease)}
 #nav.nav-day .logo{color:var(--ink)}
@@ -115,14 +116,14 @@ body.fxon #cursor{display:block}
 .nav-links a:hover{color:var(--sole)}
 .nav-cta{border:1px solid var(--sole);color:var(--sole)!important;padding:9px 20px;border-radius:100px;transition:all .3s var(--ease)!important}
 .nav-cta:hover{background:var(--sole);color:var(--notte)!important}
-#nav.shrunk{padding:12px 0;background:rgba(7,12,22,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line-d)}
+#nav.shrunk{padding:12px 0;background:rgba(7,12,22,.82);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--line-d)}
 /* di giorno */
 #nav.nav-day .word{color:var(--ink)}
 #nav.nav-day .nav-links a{color:#39424E}
 #nav.nav-day .nav-links a:hover{color:var(--fiamma)}
 #nav.nav-day .nav-cta{border-color:var(--ink);color:var(--ink)!important}
 #nav.nav-day .nav-cta:hover{background:var(--ink);color:var(--giorno)!important}
-#nav.nav-day.shrunk{background:rgba(246,241,230,.85);border-bottom:1px solid var(--line-l)}
+#nav.nav-day.shrunk{background:rgba(246,241,230,.85);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);border-bottom:1px solid var(--line-l)}
 
 /* ============================================================
    H 03:47 — NOTTE · HERO
@@ -705,6 +706,8 @@ footer .wrap{position:relative;z-index:2;display:flex;flex-direction:column;gap:
   .foot-legal{gap:12px}
   .nav-links{display:none}
   .nav-burger{display:flex}
+  /* v21 — glass più leggero su mobile: 10px basta e non satura la GPU */
+  #nav.shrunk,#nav.nav-day.shrunk{-webkit-backdrop-filter:blur(10px) saturate(1.3);backdrop-filter:blur(10px) saturate(1.3)}
   .alba-copy h2 em{font-size:.78em}
   .marquee.m-notte{padding:40px 0 14px}
   .stats,.casestudy,.turnkey,.calc,.reviews{padding-top:40px;padding-bottom:40px}
@@ -876,7 +879,7 @@ body.menu-open{overflow:hidden}
 .nav-scrim.show{opacity:1;pointer-events:auto}
 
 /* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
-body::after{content:'VER-2026-07-14-V20';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
+body::after{content:'VER-2026-07-14-V21';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 
 /* iter gse — v7 archivio split-screen */
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
@@ -2870,6 +2873,29 @@ document.querySelectorAll('[data-theme]').forEach(sec=>{
     onToggle:self=>{ if(self.isActive) nav.classList.toggle('nav-day', day); }
   });
 });
+
+/* v21 — SMART-PIN: la nav scompare scrollando in giù, riappare in su.
+   Zero layout thrashing: confronta solo due NUMERI (y corrente vs precedente),
+   nessun getBoundingClientRect, nessun refresh. Si aggancia al valore di scroll
+   senza creare un secondo listener pesante — un rAF-throttle su scroll nativo,
+   passivo. Guardie: mai nascondere in cima (< soglia) né a menu mobile aperto. */
+(function smartPin(){
+  let lastY=window.scrollY||0, ticking=false;
+  const THRESH=120;           /* sotto questa quota la nav resta sempre visibile */
+  const DELTA=6;              /* micro-movimenti ignorati: niente flicker */
+  const update=()=>{
+    ticking=false;
+    const y=window.scrollY||0;
+    if(document.body.classList.contains('menu-open')){nav.classList.remove('nav-hidden');lastY=y;return;}
+    if(Math.abs(y-lastY)<DELTA){return;}
+    if(y>lastY && y>THRESH){ nav.classList.add('nav-hidden'); }   /* giù → nascondi */
+    else{ nav.classList.remove('nav-hidden'); }                    /* su  → mostra   */
+    lastY=y;
+  };
+  window.addEventListener('scroll',()=>{
+    if(!ticking){ requestAnimationFrame(update); ticking=true; }
+  },{passive:true});
+})();
 
 /* ---------- 7. infografica "come funziona" ---------- */
 (function how(){
