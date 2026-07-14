@@ -879,7 +879,7 @@ body.menu-open{overflow:hidden}
 .nav-scrim.show{opacity:1;pointer-events:auto}
 
 /* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
-body::after{content:'VER-2026-07-14-V22';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
+body::after{content:'VER-2026-07-14-V24';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 
 /* iter gse — v7 archivio split-screen */
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
@@ -971,7 +971,18 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
    capitoli si alternano subito, niente lunghi tratti di nero. La
    dissolvenza fra scene è più rapida così il confine non "resta nero". — */
 @media (max-width:980px){
-  .impact{height:210svh}
+  /* v24 — LA CORSA, non il layout. Misurato con Playwright a 390px (libs
+     stubbate, sticky reale): pista 210svh = 1772px, stage 844px → corsa
+     sticky 928px per TRE scene = 309px a scena, il 37% di uno schermo.
+     Una singola swipe (300-500px) attraversava un capitolo intero: la
+     sezione SI incollava, ma per così poco da sembrare di no, e il
+     crossfade (.4s) perdeva la gara contro il dito lasciando scoperto
+     background:var(--notte) = il "blocco nero". 300svh → corsa ~1688px =
+     ~562px a scena (2/3 di schermo): il transito rallenta e la dissolvenza
+     fa in tempo a chiudere. NB: .imp-ui ha padding verticale 0 a <=480px
+     (vince .wrap{padding:0 15px}, stessa specificità ma dopo in cascata):
+     è VOLUTO tenerlo così, è ciò che fa stare la UI dentro i 100dvh. */
+  .impact{height:300svh}
   .imp-scene{transition:opacity .4s var(--ease)}
   .imp-ch{transition:opacity .38s var(--ease),transform .38s var(--ease),visibility 0s .38s}
   .imp-ch.is-on{transition:opacity .38s var(--ease) .06s,transform .38s var(--ease) .06s,visibility 0s}
@@ -3571,14 +3582,11 @@ window.addEventListener('resize',()=>{
     dots.forEach((d,i)=>d.classList.toggle('is-on',i===k));
   };
   /* v22 — end sulla CORSA STICKY REALE, non 'bottom bottom'.
-     'bottom bottom' chiudeva il trigger quando il fondo della sezione toccava
-     il fondo del viewport: ma lo stage sticky resta incollato per ancora un
-     viewport intero. Risultato: progress=1 (e onUpdate muto) con 100svh di
-     scroll ancora da fare → l'ultima scena non completava il crossfade e
-     restava il background:var(--notte) = BLACK OUT finale (UI a z-index:2
-     ancora visibile sopra il nero). offsetHeight-innerHeight = la corsa che
-     lo sticky percorre davvero → progress 1 esattamente allo sgancio.
-     In funzione: rivalutata a ogni ScrollTrigger.refresh() (resize v20). */
+     'bottom bottom' chiudeva il trigger quando il fondo sezione toccava il
+     fondo viewport, ma lo sticky resta incollato per un altro viewport:
+     progress=1 (onUpdate muto) con 100svh ancora da scorrere → l'ultima
+     scena non completava. offsetHeight-innerHeight = la corsa vera.
+     In funzione: rivalutata a ogni refresh (resize v20). */
   ScrollTrigger.create({trigger:sec,start:'top top',
     end:()=>'+='+Math.max(1,sec.offsetHeight-window.innerHeight),scrub:.5,
     onUpdate:self=>{
