@@ -879,7 +879,7 @@ body.menu-open{overflow:hidden}
 .nav-scrim.show{opacity:1;pointer-events:auto}
 
 /* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
-body::after{content:'VER-2026-07-14-V21';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
+body::after{content:'VER-2026-07-14-V22';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 
 /* iter gse — v7 archivio split-screen */
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
@@ -3570,7 +3570,17 @@ window.addEventListener('resize',()=>{
     chs.forEach((c,i)=>c.classList.toggle('is-on',i===k));
     dots.forEach((d,i)=>d.classList.toggle('is-on',i===k));
   };
-  ScrollTrigger.create({trigger:sec,start:'top top',end:'bottom bottom',scrub:.5,
+  /* v22 — end sulla CORSA STICKY REALE, non 'bottom bottom'.
+     'bottom bottom' chiudeva il trigger quando il fondo della sezione toccava
+     il fondo del viewport: ma lo stage sticky resta incollato per ancora un
+     viewport intero. Risultato: progress=1 (e onUpdate muto) con 100svh di
+     scroll ancora da fare → l'ultima scena non completava il crossfade e
+     restava il background:var(--notte) = BLACK OUT finale (UI a z-index:2
+     ancora visibile sopra il nero). offsetHeight-innerHeight = la corsa che
+     lo sticky percorre davvero → progress 1 esattamente allo sgancio.
+     In funzione: rivalutata a ogni ScrollTrigger.refresh() (resize v20). */
+  ScrollTrigger.create({trigger:sec,start:'top top',
+    end:()=>'+='+Math.max(1,sec.offsetHeight-window.innerHeight),scrub:.5,
     onUpdate:self=>{
       const p=self.progress;
       setC(Math.min(2,Math.floor(p*3)));
