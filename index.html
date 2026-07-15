@@ -258,7 +258,7 @@ body.fxon #cursor{display:block}
 .p-tags{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
 .p-tags span{font-size:.8rem;font-weight:600;padding:8px 15px;border-radius:100px;border:1px solid var(--line-l);color:#39424E}
 .p-tags .hot{background:var(--sole);border-color:var(--sole);color:var(--notte)}
-.p-media{position:relative;height:66vh;min-height:320px;overflow:hidden;border-radius:14px}
+.p-media{position:relative;aspect-ratio:4/3;min-height:320px;overflow:hidden;border-radius:14px}
 .p-media img{width:100%;height:100%;object-fit:cover;will-change:transform}
 /* v27 — .card-img (servizio2): il cover era già garantito da .p-media img sopra.
    Lo "zoom" percepito non veniva da qui: veniva dallo scale GSAP applicato in JS
@@ -303,6 +303,16 @@ body.fxon #cursor{display:block}
   transition:background .45s var(--ease)}
 .band-glow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .45s var(--ease);
   background:radial-gradient(360px circle at var(--mx,50%) var(--my,50%),rgba(245,166,35,.16),transparent 65%)}
+/* v28 — FIX vero (non solo card 1): .band-copy non era MAI stato position:relative.
+   In CSS gli elementi posizionati (.band-glow, .band-tag, .band-num, .band-meter
+   sono tutti absolute/relative) dipingono SEMPRE sopra i non-posizionati, a
+   prescindere dall'ordine nel DOM. .band-copy (h3+p) era l'unico non-posizionato:
+   .band-glow gli stava SEMPRE sopra, su tutte e 4 le card. Con l'oro al 16% senza
+   blur il testo restava leggibile attraverso; col blur di v27 è diventato illeggibile.
+   position:relative qui non sposta nulla (nessun top/left) — cambia solo l'ordine
+   di stacking, portando il testo sopra il glow su tutte le card. Zero impatto visivo
+   sulle altre 3, effetto correttivo su tutte. */
+.band-copy{position:relative}
 /* v27 — profondità sulla prima card (richiesta cliente): niente più oro piatto,
    toni notte/grigio che sfumano nel trasparente. Scoped SOLO alla card 1 col
    selettore esatto richiesto: le altre tre restano sul glow oro invariato.
@@ -311,7 +321,6 @@ body.fxon #cursor{display:block}
    visibile) — resta pronto se in futuro lo sfondo della card avesse texture. */
 #numeri > div > div > article:nth-child(1) > span.band-glow{
   background:radial-gradient(480px circle at var(--mx,50%) var(--my,50%),rgba(140,152,171,.30),rgba(12,22,38,.16) 55%,transparent 78%);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
   border-top:1px solid rgba(220,227,237,.16);
 }
 .band-tag{position:absolute;top:22px;left:clamp(8px,2vw,28px);display:inline-flex;align-items:center;gap:8px;
@@ -691,7 +700,7 @@ footer .wrap{position:relative;z-index:2;display:flex;flex-direction:column;gap:
   .hz-track{display:block;transform:none!important}
   .panel{width:100%;height:auto;grid-template-columns:1fr;gap:26px;padding:70px 22px}
   .panel .p-num{position:static;font-size:5rem;margin-bottom:-10px;display:block}
-  .p-media{height:56vw;min-height:280px}
+  .p-media{aspect-ratio:4/3;min-height:280px}
   .hz-ui,.marquee.m-hz{display:none}
   /* contatore solare: le bande passano in colonna */
   .band{grid-template-columns:1fr;gap:20px;padding:56px 4px 58px;align-items:start}
@@ -714,12 +723,34 @@ footer .wrap{position:relative;z-index:2;display:flex;flex-direction:column;gap:
   /* impatto mobile: pagine più compatte */
   .imp-page{padding:72px 0}
   .imp-num{font-size:clamp(3rem,16vw,4.6rem)}
+  /* v28 — .imp-scrim era tarato per due colonne (testo a sinistra, foto scoperta
+     a destra): il gradiente orizzontale a colonna singola scurisce quasi tutta
+     la larghezza stretta. Le pagine 2/3 (senza .imp-head, meno testo di pagina1)
+     restavano con grandi zone di foto scurita e senza nulla sopra — il "buco
+     nero" segnalato. NON tocco min-height:100lvh qui sopra: garantisce che la
+     pagina non lasci una fessura sulla successiva quando la barra Safari sparisce
+     (fix di una sessione precedente, motivato, non va toccato). Qui si tocca solo
+     la scurezza: via il layer orizzontale (il testo è a piena larghezza, non gli
+     serve più), resta un velo alto/basso più leggero per la leggibilità — la
+     foto respira nel mezzo invece di sparire sotto lo scrim. */
+  .imp-scrim{background:linear-gradient(0deg,rgba(7,12,22,.78),transparent 40%),linear-gradient(180deg,rgba(7,12,22,.55),transparent 30%)}
   /* recensioni: griglia in colonna singola */
   /* fiume recensioni compatto su mobile */
   .rev-river{margin-top:36px;gap:16px}
   .rev-card{width:320px}
   .rev-set{gap:16px;padding-right:16px}
   .contact .wrap{grid-template-columns:1fr;gap:44px}
+  /* v28 — .tram-sun: a due colonne il sole vive nello spazio libero accanto al
+     testo; sotto i 980px .contact .wrap diventa una colonna sola (riga sopra) e
+     il titolo si allarga fino a invadere la stessa posizione. Risultato: il nucleo
+     quasi-bianco del sole (#FFF3D2/#FFD061) cadeva esattamente dietro "gratis."
+     (bianco, .contact h2 em{color:#fff}) — bianco su quasi-bianco, testo illeggibile.
+     Non è un problema di a-capo (coerente con "chiaro."/"pianeta." altrove nel
+     sito): si sposta il sole più in basso e più piccolo, fuori dalla zona titolo,
+     + un text-shadow di sicurezza sull'em nel caso di overlap residuo a device
+     strettissimi. */
+  .tram-sun{left:auto;right:-6vmin;top:20vh;width:44vmin;height:44vmin}
+  .contact h2 em{text-shadow:0 2px 20px rgba(7,12,22,.35)}
   .foot-grid{grid-template-columns:1fr 1fr;gap:36px 28px}
   .foot-brand{grid-column:1/-1;max-width:none}
   .foot-legal{gap:12px}
@@ -982,7 +1013,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
   /* — 2. SERVIZI: meno aria verticale tra i pannelli — */
   .panel{padding:44px 22px!important;gap:20px!important}
   .panel .p-num{font-size:4rem!important;margin-bottom:-4px!important}
-  .p-media{height:48vw!important;min-height:210px!important}
+  .p-media{aspect-ratio:4/3;min-height:210px}
 
   /* — 3. BANDE FISCO: attivazione "notte" via classe .lit (IntersectionObserver, vedi JS) —
      replica delle stesse regole hover desktop, ma pilotate dallo scroll su touch */
