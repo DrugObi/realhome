@@ -472,56 +472,46 @@ input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.12)}
 input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:var(--giorno-2);border:3px solid var(--fiamma);cursor:pointer}
 
 /* H 18:10 — impatto */
-/* ── v16. IMPATTO — viaggio a tutto schermo su position:sticky ──
-   La sezione è la pista (340svh), lo stage resta incollato al viewport.
-   Nessun pin GSAP: lo sticky è del browser, non ha spacer né misure
-   da ricalcolare. I crossfade sono classi + transizioni CSS: anche se
-   il progress arriva a scatti, la dissolvenza resta morbida. */
-.impact{position:relative;height:340svh;background:var(--notte)}
-.imp-stage{position:sticky;top:0;height:100svh;overflow:hidden;display:flex;align-items:center}
-.imp-scenes{position:absolute;inset:0;z-index:1}
-/* v25 — crossfade STRATIFICATO, non simmetrico. Il vecchio schema (out e in
-   insieme, entrambi semitrasparenti a metà corsa) garantiva un buco scuro su
-   --notte a OGNI cambio scena: su desktop (.65s, rotella) invisibile, su
-   mobile (flick) sempre visibile. Era questo il "nero", non la pista (v24)
-   né il box-model (v23). Ora: la scena uscente riceve .is-under e resta a
-   opacità 1 SOTTO (senza transizione: era già a 1, nessun salto); la nuova
-   entra in fade SOPRA (z-index 2). In ogni istante c'è una foto a copertura
-   piena. z-index:1 su .imp-scenes = stacking context: gli z dei layer non
-   competono con .imp-ui (z2). */
-.imp-scene{position:absolute;inset:0;opacity:0;transition:opacity .65s var(--ease);will-change:opacity;transform:translateZ(0);z-index:0}
-.imp-scene.is-under{opacity:1;transition:none;z-index:1}
-.imp-scene.is-on{opacity:1;z-index:2}
-.imp-bg{position:absolute;inset:-6%;background-size:cover;background-position:center;will-change:transform;transform:translateZ(0)}
+/* ── v26. IMPATTO — TRE PAGINE VERE ────────────────────────────
+   Il "nero" (v22→v25) non è MAI stato il crossfade: era position:sticky
+   MORTO. La regola @media (max-width:720px){html,body{overflow-x:hidden}}
+   (~riga 750) rende <body> uno scroll container, e uno sticky dentro un
+   container che non scorre non si incolla mai. Sotto i 720px lo stage
+   scorreva via dopo 100svh e restavano ~200svh di pista nuda su
+   background:var(--notte) = il blocco nero degli screenshot. Sopra i 720px
+   la regola non si applica, html resta visible, l'overflow di body viene
+   propagato al viewport e body torna visible: ecco, letteralmente, il
+   "da pc funziona". V22/V23/V24/V25 hanno curato un sintomo inesistente.
+   v26 non aggiusta i parametri del meccanismo: TOGLIE il meccanismo. Tre
+   article da uno schermo, ognuno con la SUA foto a opacity:1 e inset:0.
+   Niente sticky, niente crossfade, niente snap, niente GSAP, niente JS.
+   Il nero non diventa raro: non ha più un posto dove esistere. */
+.impact{position:relative;background:var(--notte)}
+.imp-page{position:relative;min-height:100svh;padding:96px 0;display:flex;align-items:center;overflow:hidden;background:var(--notte)}
+/* inset:0 = padding box dell'article: la copertura piena è un fatto di
+   box-model, non di timing. Niente inset:-6% (serviva alla parallasse). */
+.imp-bg{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat}
 .imp-scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,12,22,.9) 0%,rgba(7,12,22,.62) 46%,rgba(7,12,22,.22) 100%),linear-gradient(0deg,rgba(7,12,22,.88),transparent 42%),linear-gradient(180deg,rgba(7,12,22,.72),transparent 26%)}
-.imp-ui{position:relative;z-index:2;width:100%;color:#F6F1E6;padding:96px 0 84px;display:flex;flex-direction:column;min-height:100svh;justify-content:center}
+.imp-ui{position:relative;z-index:2;width:100%;color:#F6F1E6}
 .imp-head{margin-bottom:34px}
 .imp-title{font-size:clamp(1.7rem,3vw,2.5rem);margin:14px 0 8px;color:#F6F1E6}
 .imp-title em{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:var(--sole)}
 .imp-note{font-size:.9rem;color:var(--muted-d)}
-/* i capitoli si sovrappongono nello stesso spazio: uno solo è acceso */
-.imp-chapters{position:relative;min-height:330px}
-.imp-ch{position:absolute;inset:0 auto auto 0;max-width:660px;opacity:0;visibility:hidden;transform:translateY(26px);transition:opacity .55s var(--ease),transform .55s var(--ease),visibility 0s .55s}
-.imp-ch.is-on{opacity:1;visibility:visible;transform:none;transition:opacity .55s var(--ease) .1s,transform .55s var(--ease) .1s,visibility 0s}
+.imp-ch{max-width:660px}
 .imp-eyebrow{font-size:.74rem;letter-spacing:.22em;text-transform:uppercase;font-weight:600;color:var(--sole)}
 .imp-num{font-family:'Bricolage Grotesque',sans-serif;font-weight:780;font-size:clamp(4rem,10vw,8rem);line-height:.95;letter-spacing:-.04em;font-variant-numeric:tabular-nums;margin:14px 0 18px;text-shadow:0 6px 40px rgba(0,0,0,.5)}
 .imp-num i{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;font-size:.34em;color:#DCE3ED;margin-left:.18em;letter-spacing:0}
 .imp-ch h3{font-size:1.25rem;margin-bottom:10px;color:#F6F1E6}
 .imp-ch p{font-size:1rem;line-height:1.7;color:#C7CFDA;max-width:46ch}
-/* rail dei capitoli: tacche col nome, in basso */
-.imp-rail{display:flex;gap:26px;margin-top:44px}
-.imp-dot{position:relative;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--muted-d);padding-top:12px;transition:color .4s var(--ease)}
-.imp-dot::before{content:'';position:absolute;top:0;left:0;width:34px;height:2px;background:rgba(246,241,230,.18);transition:background .4s var(--ease)}
-.imp-dot.is-on{color:#F6F1E6}
-.imp-dot.is-on::before{background:var(--sole);box-shadow:0 0 12px rgba(245,166,35,.7)}
-.imp-cue{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted-d);transition:opacity .5s var(--ease)}
-.imp-cue.gone{opacity:0}
-/* fallback senza FX/JS: capitoli impilati, niente pista lunga */
-.impact.static{height:auto}
-.impact.static .imp-stage{position:relative;height:auto;padding:40px 0}
-.impact.static .imp-chapters{min-height:0}
-.impact.static .imp-ch{position:static;opacity:1;visibility:visible;transform:none;margin-bottom:56px}
-.impact.static .imp-rail,.impact.static .imp-cue{display:none}
+.imp-cue{position:absolute;left:50%;bottom:26px;z-index:3;transform:translateX(-50%);font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--muted-d)}
+/* respiro della foto: additivo puro. @supports + reduced-motion; scale>=1
+   non scopre mai i bordi. Senza scroll-driven animations: foto ferma. */
+@supports (animation-timeline:view()){
+  @media (prefers-reduced-motion:no-preference){
+    .imp-bg{animation:impBreath linear both;animation-timeline:view();will-change:transform}
+    @keyframes impBreath{from{transform:scale(1.08)}to{transform:scale(1)}}
+  }
+}
 
 /* H 19:00 — recensioni: griglia pulita, stabile, leggibile */
 /* ── v16. RECENSIONI — il fiume in controcorrente ──
@@ -698,13 +688,9 @@ footer .wrap{position:relative;z-index:2;display:flex;flex-direction:column;gap:
   .tw-grid2{grid-template-columns:1fr;gap:28px}
   .tw-scene{order:-1}
   .tw-house{width:min(240px,72%)}
-  /* impatto mobile: numeri e rail compatti
-     (l'altezza pista è nel blocco V15 in coda) */
-  .imp-ui{padding:80px 0 70px}
+  /* impatto mobile: pagine più compatte */
+  .imp-page{padding:72px 0}
   .imp-num{font-size:clamp(3rem,16vw,4.6rem)}
-  .imp-chapters{min-height:300px}
-  .imp-rail{gap:16px;margin-top:30px}
-  .imp-dot{font-size:.62rem}
   /* recensioni: griglia in colonna singola */
   /* fiume recensioni compatto su mobile */
   .rev-river{margin-top:36px;gap:16px}
@@ -889,7 +875,7 @@ body.menu-open{overflow:hidden}
 .nav-scrim.show{opacity:1;pointer-events:auto}
 
 /* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
-body::after{content:'VER-2026-07-14-V25';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
+body::after{content:'VER-2026-07-14-V26';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 
 /* iter gse — v7 archivio split-screen */
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
@@ -968,40 +954,21 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
   .band.lit .band-meter{background:rgba(255,255,255,.12)}
 }
 
-/* — 4. FORESTA/IMPATTO: lo sticky usa l'altezza dinamica reale del viewport,
-   così non "salta" quando la barra URL di Safari/Chrome mobile si nasconde — */
-@supports (height:100dvh){
+/* — 4. IMPATTO mobile: 100lvh, non svh né dvh. lvh = viewport con la barra
+   URL nascosta, cioè il MASSIMO: la pagina copre sempre almeno uno schermo
+   pieno (mai una fessura sulla pagina successiva quando la barra sparisce)
+   e non rifà il layout a metà scroll come farebbe dvh. — */
+@supports (height:100lvh){
   @media (max-width:980px){
-    .imp-stage{height:100dvh}
-    .imp-ui{min-height:100dvh}
+    .imp-page{min-height:100lvh}
   }
 }
 
-/* — 5. FOOTER / coda nera: pista impatto più corta su mobile: i tre
-   capitoli si alternano subito, niente lunghi tratti di nero. La
-   dissolvenza fra scene è più rapida così il confine non "resta nero". — */
-@media (max-width:980px){
-  /* v24 — LA CORSA, non il layout. Misurato con Playwright a 390px (libs
-     stubbate, sticky reale): pista 210svh = 1772px, stage 844px → corsa
-     sticky 928px per TRE scene = 309px a scena, il 37% di uno schermo.
-     Una singola swipe (300-500px) attraversava un capitolo intero: la
-     sezione SI incollava, ma per così poco da sembrare di no, e il
-     crossfade (.4s) perdeva la gara contro il dito lasciando scoperto
-     background:var(--notte) = il "blocco nero". 300svh → corsa ~1688px =
-     ~562px a scena (2/3 di schermo): il transito rallenta e la dissolvenza
-     fa in tempo a chiudere. NB: .imp-ui ha padding verticale 0 a <=480px
-     (vince .wrap{padding:0 15px}, stessa specificità ma dopo in cascata):
-     è VOLUTO tenerlo così, è ciò che fa stare la UI dentro i 100dvh. */
-  .impact{height:300svh}
-  .imp-scene{transition:opacity .4s var(--ease)}
-  .imp-ch{transition:opacity .38s var(--ease),transform .38s var(--ease),visibility 0s .38s}
-  .imp-ch.is-on{transition:opacity .38s var(--ease) .06s,transform .38s var(--ease) .06s,visibility 0s}
-}
 
 /* — guard v15-3: se le librerie CDN non caricano, .no-anim rivela tutto
    ciò che parte nascosto in attesa di GSAP, così il sito resta leggibile — */
 .no-anim .tr .mask,.no-anim .fx{opacity:1!important;transform:none!important}
-.no-anim .imp-ch,.no-anim .gse-step{opacity:1!important;visibility:visible!important;transform:none!important}
+.no-anim .gse-step{opacity:1!important;visibility:visible!important;transform:none!important}
 
 /* ============================================
    VER-2026-07-13-V17 — HERO MAGAZINE
@@ -2107,57 +2074,58 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
 </section>
 
 <!-- H 18:10 · impatto -->
-<!-- v16 — IMPATTO: da tre card a un VIAGGIO A TUTTO SCHERMO.
-     Architettura anti-bug: position:sticky (CSS puro, niente pin GSAP,
-     niente spacer). La sezione è la pista di scroll (340svh), lo stage
-     resta incollato al viewport e dentro si attraversano tre mondi:
-     la foresta → la strada → il tempo. Gli id trees/kmev/co2kg sono
-     NERVI: render() del simulatore ci scrive dentro. -->
+<!-- v26 — IMPATTO: TRE PAGINE VERE. Il nero di v22→v25 era position:sticky
+     morto sotto i 720px (vedi commento CSS ~riga 475 e mina 35 dell'handoff
+     v10). Qui non c'è più un meccanismo da rompere: tre article alti uno
+     schermo, ognuno con la sua foto opaca, si scorrono come pagine.
+     Gli id trees/kmev/co2kg sono NERVI: render() del simulatore ci scrive. -->
 <section class="impact" id="impatto" data-theme="notte">
-  <div class="imp-stage">
-    <div class="imp-scenes" aria-hidden="true">
-      <div class="imp-scene is-on"><div class="imp-bg" style="background-image:url(impatto-alberi.webp)"></div></div>
-      <div class="imp-scene"><div class="imp-bg" style="background-image:url(impatto-km.webp)"></div></div>
-      <div class="imp-scene"><div class="imp-bg" style="background-image:url(impatto-co2.webp)"></div></div>
-      <div class="imp-scrim"></div>
-    </div>
 
+  <article class="imp-page">
+    <div class="imp-bg" style="background-image:url(impatto-alberi.webp)" aria-hidden="true"></div>
+    <div class="imp-scrim" aria-hidden="true"></div>
     <div class="wrap imp-ui">
       <header class="imp-head">
         <span class="kicker"><span class="ora">H 18:10</span><span class="sep">·</span>Impatto ambientale</span>
         <h2 class="imp-title">Il tuo risparmio, <em>tradotto in pianeta.</em></h2>
         <p class="imp-note">I valori seguono la bolletta che hai impostato nel simulatore.</p>
       </header>
-
-      <div class="imp-chapters">
-        <article class="imp-ch is-on">
-          <span class="imp-eyebrow">01 — La foresta</span>
-          <div class="imp-num"><span id="trees">70</span><i>alberi</i></div>
-          <h3>Piantati ogni anno, virtualmente</h3>
-          <p>La CO₂ che il tuo impianto evita equivale al lavoro annuale di questi alberi adulti.</p>
-        </article>
-        <article class="imp-ch">
-          <span class="imp-eyebrow">02 — La strada</span>
-          <div class="imp-num"><span id="kmev">11.700</span><i>km</i></div>
-          <h3>Di auto a benzina evitati</h3>
-          <p>Le stesse emissioni di questi chilometri percorsi ogni anno con un'auto a benzina.</p>
-        </article>
-        <article class="imp-ch">
-          <span class="imp-eyebrow">03 — Il tempo</span>
-          <div class="imp-num"><span id="co2kg">1.400</span><i>kg CO₂</i></div>
-          <h3>In meno nell'atmosfera, ogni anno</h3>
-          <p>Per oltre 20 anni di vita dell'impianto: un lascito concreto, non uno slogan.</p>
-        </article>
+      <div class="imp-ch">
+        <span class="imp-eyebrow">01 — La foresta</span>
+        <div class="imp-num"><span id="trees">70</span><i>alberi</i></div>
+        <h3>Piantati ogni anno, virtualmente</h3>
+        <p>La CO₂ che il tuo impianto evita equivale al lavoro annuale di questi alberi adulti.</p>
       </div>
-
-      <div class="imp-rail" aria-hidden="true">
-        <span class="imp-dot is-on">La foresta</span>
-        <span class="imp-dot">La strada</span>
-        <span class="imp-dot">Il tempo</span>
-      </div>
-      <span class="imp-cue" aria-hidden="true">Scorri per attraversare</span>
     </div>
-  </div>
+    <span class="imp-cue" aria-hidden="true">Scorri</span>
+  </article>
+
+  <article class="imp-page">
+    <div class="imp-bg" style="background-image:url(impatto-km.webp)" aria-hidden="true"></div>
+    <div class="imp-scrim" aria-hidden="true"></div>
+    <div class="wrap imp-ui">
+      <div class="imp-ch">
+        <span class="imp-eyebrow">02 — La strada</span>
+        <div class="imp-num"><span id="kmev">11.700</span><i>km</i></div>
+        <h3>Di auto a benzina evitati</h3>
+        <p>Le stesse emissioni di questi chilometri percorsi ogni anno con un'auto a benzina.</p>
+      </div>
+    </div>
+  </article>
+
+  <article class="imp-page">
+    <div class="imp-bg" style="background-image:url(impatto-co2.webp)" aria-hidden="true"></div>
+    <div class="imp-scrim" aria-hidden="true"></div>
+    <div class="wrap imp-ui">
+      <div class="imp-ch">
+        <span class="imp-eyebrow">03 — Il tempo</span>
+        <div class="imp-num"><span id="co2kg">1.400</span><i>kg CO₂</i></div>
+        <h3>In meno nell'atmosfera, ogni anno</h3>
+        <p>Per oltre 20 anni di vita dell'impianto: un lascito concreto, non uno slogan.</p>
+      </div>
+    </div>
+  </article>
+
 </section>
 
 <!-- H 19:00 · recensioni -->
@@ -2410,7 +2378,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
 if(typeof gsap==='undefined' || typeof ScrollTrigger==='undefined'){
   console.warn('RealHome: libreria di animazione non caricata dal CDN — modalità statica.');
   document.documentElement.classList.add('no-anim');
-  document.querySelectorAll('.impact,.reviews,.gse-split,.hz,.how,.diagram')
+  document.querySelectorAll('.reviews,.gse-split,.hz,.how,.diagram')
     .forEach(el=>el.classList.add('static'));
 }else{
 gsap.registerPlugin(ScrollTrigger);
@@ -3570,63 +3538,6 @@ window.addEventListener('resize',()=>{
   clearTimeout(rzT);
   rzT=setTimeout(()=>ScrollTrigger.refresh(),300);
 },{passive:true});
-
-/* ---------- v16. IMPATTO — il viaggio a tre capitoli ----------
-   Nessun pin: lo stage è sticky (CSS), qui si decide solo QUALE capitolo
-   è acceso in base al progress della pista, più la parallasse del fondale.
-   I crossfade li fanno le transizioni CSS: robusto anche a scroll a scatti. */
-(function impactStory(){
-  const sec=document.querySelector('.impact');
-  if(!sec) return;
-  const scenes=[...sec.querySelectorAll('.imp-scene')];
-  const bgs=[...sec.querySelectorAll('.imp-bg')];
-  const chs=[...sec.querySelectorAll('.imp-ch')];
-  const dots=[...sec.querySelectorAll('.imp-dot')];
-  const cue=sec.querySelector('.imp-cue');
-  if(!FX){sec.classList.add('static');return;}
-  let cur=0;
-  const setC=k=>{
-    if(k===cur)return;
-    const prev=cur;cur=k;
-    /* v25 — la scena che esce diventa .is-under: resta opaca SOTTO mentre
-       la nuova sfuma sopra. Niente più istante a doppia semitrasparenza
-       su --notte (il "nero" di mina 29). */
-    scenes.forEach((s,i)=>{
-      s.classList.toggle('is-on',i===k);
-      s.classList.toggle('is-under',i===prev);
-    });
-    chs.forEach((c,i)=>c.classList.toggle('is-on',i===k));
-    dots.forEach((d,i)=>d.classList.toggle('is-on',i===k));
-  };
-  /* v25 — snap sui CENTRI delle tre scene, solo mobile. La pista lunga (v24)
-     non basta: un flick con momentum iOS copre 1000-2000px e attraversa un
-     capitolo comunque. Lo snap assesta ogni gesto sul capitolo più vicino =
-     "la sezione oppone resistenza". Bordi liberi (p<.06 / p>.94) per non
-     imprigionare l'utente dentro la sezione. */
-  const snapMob=window.matchMedia('(max-width:980px)').matches?{
-    snap:{snapTo:v=>{if(v<.06||v>.94)return v;
-        const c=[1/6,.5,5/6];return c.reduce((a,b)=>Math.abs(b-v)<Math.abs(a-v)?b:a);},
-      duration:{min:.25,max:.7},ease:'power2.out',delay:.08}
-  }:{};
-  /* v22 — end sulla CORSA STICKY REALE, non 'bottom bottom'.
-     'bottom bottom' chiudeva il trigger quando il fondo sezione toccava il
-     fondo viewport, ma lo sticky resta incollato per un altro viewport:
-     progress=1 (onUpdate muto) con 100svh ancora da scorrere → l'ultima
-     scena non completava. offsetHeight-innerHeight = la corsa vera.
-     In funzione: rivalutata a ogni refresh (resize v20). */
-  ScrollTrigger.create({trigger:sec,start:'top top',
-    end:()=>'+='+Math.max(1,sec.offsetHeight-window.innerHeight),scrub:.5,...snapMob,
-    onUpdate:self=>{
-      const p=self.progress;
-      setC(Math.min(2,Math.floor(p*3)));
-      /* parallasse del fondale attivo: respira e sale lungo il suo terzo.
-         force3D:true → GSAP scrive translateZ(0) nel transform, così la
-         promozione a layer GPU sopravvive al gsap.set (non la sovrascrive). */
-      const frac=Math.min(1,Math.max(0,p*3-cur));
-      gsap.set(bgs[cur],{scale:1.1-.08*frac,yPercent:-3*frac,force3D:true});
-      cue.classList.toggle('gone',p>.06);
-    }});
-})();
 
 } /* /else — fine engine con librerie caricate (guard v15-3) */
 
