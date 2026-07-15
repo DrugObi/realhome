@@ -264,7 +264,11 @@ body.fxon #cursor{display:block}
    Lo "zoom" percepito non veniva da qui: veniva dallo scale GSAP applicato in JS
    (servicesHZ). Il fix vero è là (imgs[1] escluso dai tween); questa classe resta
    come marker esplicito + guardia CSS, innocua e ridondante col resto. */
-.card-img{width:100%;height:100%;object-fit:cover;object-position:center}
+/* v29 — la pompa sta nella parte DESTRA della foto: il crop centrato la mozzava.
+   Ancorato a destra: quello che si perde è muro vuoto a sinistra, non il soggetto.
+   Se sul device la pompa risultasse ancora tagliata, il passo successivo è
+   object-fit:contain solo per questa card (foto intera, bande ai lati). */
+.card-img{width:100%;height:100%;object-fit:cover;object-position:100% 50%}
 .m-cap{position:absolute;left:16px;bottom:14px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#fff;background:rgba(16,24,34,.55);backdrop-filter:blur(8px);padding:8px 14px;border-radius:100px}
 /* pannelli notturni alternati: il ritmo giorno/notte continua anche qui */
 .panel.dark,.panel.deep{color:#F6F1E6}
@@ -313,16 +317,9 @@ body.fxon #cursor{display:block}
    di stacking, portando il testo sopra il glow su tutte le card. Zero impatto visivo
    sulle altre 3, effetto correttivo su tutte. */
 .band-copy{position:relative}
-/* v27 — profondità sulla prima card (richiesta cliente): niente più oro piatto,
-   toni notte/grigio che sfumano nel trasparente. Scoped SOLO alla card 1 col
-   selettore esatto richiesto: le altre tre restano sul glow oro invariato.
-   Nota onesta: il backdrop-filter qui è innocuo oggi (dietro c'è il colore
-   piatto --notte di .band.lit, sfocare una tinta piatta non produce effetto
-   visibile) — resta pronto se in futuro lo sfondo della card avesse texture. */
-#numeri > div > div > article:nth-child(1) > span.band-glow{
-  background:radial-gradient(480px circle at var(--mx,50%) var(--my,50%),rgba(140,152,171,.30),rgba(12,22,38,.16) 55%,transparent 78%);
-  border-top:1px solid rgba(220,227,237,.16);
-}
+/* v29 — RIMOSSO il restyling speciale della card 1 (era v27, su richiesta di
+   allora): a collaudo fatto, una card diversa dalle altre tre stona. Tutte e
+   quattro tornano identiche: fondo --notte via .lit/.hover + stesso glow oro. */
 .band-tag{position:absolute;top:22px;left:clamp(8px,2vw,28px);display:inline-flex;align-items:center;gap:8px;
   font-family:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
   font-size:.64rem;letter-spacing:.15em;font-weight:500;color:var(--muted-l);opacity:.75;
@@ -602,7 +599,10 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;bac
 .contact .kicker{color:var(--notte)}
 .contact .kicker::before{background:var(--notte)}
 .contact h2{font-size:clamp(2.8rem,6vw,5rem);margin:18px 0 20px}
-.contact h2 em{color:#fff}
+/* v29 — 'è gratis.' è un'unità: nowrap impedisce il break TRA 'è' e 'gratis'.
+   Se non entra dopo 'passo', va a capo il blocco intero: "Il primo passo" /
+   "è gratis." — mai più la 'è' orfana a fine riga. */
+.contact h2 em{color:#fff;white-space:nowrap}
 .contact .sub{font-size:1.08rem;color:rgba(16,24,34,.78);max-width:44ch}
 .c-info{margin-top:44px;display:flex;flex-direction:column;gap:22px;font-size:.96rem;color:rgba(16,24,34,.85)}
 .c-info b{display:block;font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;margin-bottom:6px;color:var(--notte)}
@@ -733,7 +733,10 @@ footer .wrap{position:relative;z-index:2;display:flex;flex-direction:column;gap:
      la scurezza: via il layer orizzontale (il testo è a piena larghezza, non gli
      serve più), resta un velo alto/basso più leggero per la leggibilità — la
      foto respira nel mezzo invece di sparire sotto lo scrim. */
-  .imp-scrim{background:linear-gradient(0deg,rgba(7,12,22,.78),transparent 40%),linear-gradient(180deg,rgba(7,12,22,.55),transparent 30%)}
+  .imp-scrim{background:linear-gradient(0deg,rgba(7,12,22,.82),rgba(7,12,22,.3) 42%,rgba(7,12,22,.18) 70%),linear-gradient(180deg,rgba(7,12,22,.62),rgba(7,12,22,.22) 38%,transparent 62%)}
+  /* v29 — cintura di sicurezza: sulle zone chiare delle foto (cielo) il testo
+     affogava anche col velo. L'ombra segue il testo ovunque sia. */
+  .imp-ui{text-shadow:0 1px 2px rgba(7,12,22,.5),0 6px 24px rgba(7,12,22,.4)}
   /* recensioni: griglia in colonna singola */
   /* fiume recensioni compatto su mobile */
   .rev-river{margin-top:36px;gap:16px}
@@ -750,7 +753,7 @@ footer .wrap{position:relative;z-index:2;display:flex;flex-direction:column;gap:
      + un text-shadow di sicurezza sull'em nel caso di overlap residuo a device
      strettissimi. */
   .tram-sun{left:auto;right:-6vmin;top:20vh;width:44vmin;height:44vmin}
-  .contact h2 em{text-shadow:0 2px 20px rgba(7,12,22,.35)}
+  .contact h2 em{text-shadow:0 1px 2px rgba(7,12,22,.28),0 4px 26px rgba(7,12,22,.45)}
   .foot-grid{grid-template-columns:1fr 1fr;gap:36px 28px}
   .foot-brand{grid-column:1/-1;max-width:none}
   .foot-legal{gap:12px}
@@ -929,7 +932,7 @@ body.menu-open{overflow:hidden}
 .nav-scrim.show{opacity:1;pointer-events:auto}
 
 /* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
-body::after{content:'VER-2026-07-14-V26';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
+body::after{content:'VER-2026-07-15-V29';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 
 /* iter gse — v7 archivio split-screen */
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
@@ -950,8 +953,14 @@ body::after{content:'VER-2026-07-14-V26';position:fixed;bottom:8px;left:8px;z-in
      in flusso normale, invariata. Nessun conflitto con la mina 35: quella
      regola (overflow-x:hidden sotto i 720px) non tocca mai questo ramo. */
   .impact.live{display:grid;grid-template-rows:1fr;height:300vh}
+  /* v29 — BUG della v27, trovato: la grid di default STIRA gli item all'altezza
+     della riga (300vh). Un elemento sticky alto quanto il suo container ha zero
+     corsa: non si incolla mai — stessa classe d'errore dello sticky morto V25,
+     travestita. E il contenuto (flex centrato) flottava a metà dei 300vh.
+     Fix: height FISSA a uno schermo + align-self:start = niente stretch, la
+     pagina sta in alto, lo sticky ha 200vh di corsa, il crossfade lavora. */
   .impact.live .imp-page{grid-row:1;grid-column:1;position:sticky;top:0;
-    min-height:100lvh;opacity:0;pointer-events:none;transition:opacity .6s ease}
+    height:100lvh;align-self:start;opacity:0;pointer-events:none;transition:opacity .6s ease}
   .impact.live .imp-page.is-live{opacity:1;pointer-events:auto}
   /* il respiro impBreath (bonus V26) è pensato per pagine che scorrono in
      flusso; con grid+sticky il suo animation-timeline:view() non è
@@ -2900,6 +2909,21 @@ if (FX){
       pages.forEach(p=>p.classList.remove('is-live'));
       lastI=-1;
     };
+  });
+  /* v29 — MOBILE: le pagine restano in flusso (niente sticky sotto i 981px:
+     è il meccanismo che ha prodotto il blocco nero V22-V25, mina 35 — il
+     rimedio overflow-x:clip esiste ma va collaudato su Safari prima di
+     fidarsi). Vita alle pagine con gli ingressi scaglionati: stesso pattern
+     delle altre sezioni mobile del sito (panels, gse-step). once:true =
+     leggero, nessun lavoro continuo durante lo scroll. */
+  mm.add('(max-width:980px)',()=>{
+    if(!FX) return;
+    pages.forEach(p=>{
+      const parts=p.querySelectorAll('.imp-head > *,.imp-ch > *');
+      if(!parts.length) return;
+      gsap.from(parts,{y:26,opacity:0,duration:.65,stagger:.09,ease:'power3.out',
+        scrollTrigger:{trigger:p,start:'top 72%',once:true}});
+    });
   });
 })();
 
