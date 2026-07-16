@@ -318,6 +318,17 @@ body.fxon #cursor{display:block}
   transition:background .45s var(--ease)}
 .band-glow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .45s var(--ease);
   background:radial-gradient(360px circle at var(--mx,50%) var(--my,50%),rgba(245,166,35,.16),transparent 65%)}
+/* v31 — FOTO IN SOTTOIMPRESSIONE per banda: ogni card ha la sua immagine a tema
+   (bolletta/fotovoltaico/infissi/rientro), rivelata SOLO via opacity (compositor,
+   mina 43: niente clip-path). Il velo scuro è cotto nello stesso background
+   (linear-gradient sopra l'immagine) così il testo bianco resta leggibile.
+   Primo figlio del .band: tutti i fratelli posizionati dipingono sopra (v28). */
+.band-bg{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .45s var(--ease);
+  background-size:cover;background-position:center;background-repeat:no-repeat}
+.band:nth-child(1) .band-bg{background-image:linear-gradient(rgba(7,12,22,.52),rgba(7,12,22,.52)),url('numeri1.webp')}
+.band:nth-child(2) .band-bg{background-image:linear-gradient(rgba(7,12,22,.52),rgba(7,12,22,.52)),url('numeri2.webp')}
+.band:nth-child(3) .band-bg{background-image:linear-gradient(rgba(7,12,22,.52),rgba(7,12,22,.52)),url('numeri3.webp')}
+.band:nth-child(4) .band-bg{background-image:linear-gradient(rgba(7,12,22,.52),rgba(7,12,22,.52)),url('numeri4.webp')}
 /* v28 — FIX vero (non solo card 1): .band-copy non era MAI stato position:relative.
    In CSS gli elementi posizionati (.band-glow, .band-tag, .band-num, .band-meter
    sono tutti absolute/relative) dipingono SEMPRE sopra i non-posizionati, a
@@ -356,6 +367,7 @@ body.fxon #cursor{display:block}
 /* — attivazione notte (solo dispositivi con hover reale) — */
 @media (hover:hover) and (pointer:fine){
   .band:hover{background:var(--notte)}
+  .band:hover .band-bg{opacity:1}   /* v31: la foto a tema emerge col cursore */
   .band:hover .band-glow{opacity:1}
   .band:hover .band-tag{color:var(--sole);opacity:1}
   .band:hover .bn-ghost{-webkit-text-stroke-color:rgba(246,241,230,.22)}
@@ -943,7 +955,7 @@ body.menu-open{overflow:hidden}
 .nav-scrim.show{opacity:1;pointer-events:auto}
 
 /* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
-body::after{content:'VER-2026-07-15-V30';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
+body::after{content:'VER-2026-07-16-V31';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 
 /* iter gse — v7 archivio split-screen */
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
@@ -1038,6 +1050,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
   /* — 3. BANDE FISCO: attivazione "notte" via classe .lit (IntersectionObserver, vedi JS) —
      replica delle stesse regole hover desktop, ma pilotate dallo scroll su touch */
   .band.lit{background:var(--notte)}
+  .band.lit .band-bg{opacity:1}   /* v31: su touch la foto emerge quando lo scroll attiva la banda (IO .lit) */
   .band.lit .band-glow{opacity:1}
   .band.lit .band-tag{color:var(--sole);opacity:1}
   .band.lit .bn-ghost{-webkit-text-stroke-color:rgba(246,241,230,.22)}
@@ -1735,6 +1748,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
     <div class="stats-rail">
 
       <article class="band" data-target="80" data-prefix="−" data-suffix="%" data-frac=".80">
+        <span class="band-bg" aria-hidden="true"></span>
         <span class="band-glow" aria-hidden="true"></span>
         <span class="band-tag">[ DATI // 01 ]</span>
         <div class="band-num" aria-hidden="true"><span class="bn-ghost">−0%</span><span class="bn-fill">−0%</span></div>
@@ -1746,6 +1760,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
       </article>
 
       <article class="band" data-target="50" data-suffix="%" data-frac=".50">
+        <span class="band-bg" aria-hidden="true"></span>
         <span class="band-glow" aria-hidden="true"></span>
         <span class="band-tag">[ FISCO // 02 ]</span>
         <div class="band-num" aria-hidden="true"><span class="bn-ghost">0%</span><span class="bn-fill">0%</span></div>
@@ -1757,6 +1772,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
       </article>
 
       <article class="band" data-target="65" data-suffix="%" data-frac=".65">
+        <span class="band-bg" aria-hidden="true"></span>
         <span class="band-glow" aria-hidden="true"></span>
         <span class="band-tag">[ FISCO // 03 ]</span>
         <div class="band-num" aria-hidden="true"><span class="bn-ghost">0%</span><span class="bn-fill">0%</span></div>
@@ -1768,6 +1784,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
       </article>
 
       <article class="band" data-target="6" data-prefix="4–" data-frac=".30">
+        <span class="band-bg" aria-hidden="true"></span>
         <span class="band-glow" aria-hidden="true"></span>
         <span class="band-tag">[ RIENTRO // 04 ]</span>
         <div class="band-num" aria-hidden="true"><span class="bn-ghost">4–0</span><span class="bn-fill">4–0</span></div>
