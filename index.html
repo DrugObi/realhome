@@ -280,7 +280,11 @@ body.fxon #cursor{display:block}
    Se sul device la pompa risultasse ancora tagliata, il passo successivo è
    object-fit:contain solo per questa card (foto intera, bande ai lati). */
 .card-img{width:100%;height:100%;object-fit:cover;object-position:100% 50%}
-.m-cap{position:absolute;left:16px;bottom:14px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#fff;background:rgba(16,24,34,.55);backdrop-filter:blur(8px);padding:8px 14px;border-radius:100px}
+/* v32 — PERF: via il backdrop-filter:blur(8px) (sospetto n.1 residuo del v12 §3.3):
+   era un blur CONTINUO sopra contenuto che si trasforma (skew/scale/parallasse) a ogni
+   frame dello scrub servizi = repaint ricorrente. Fondo più coprente (.55→.8), stessa
+   pillola scura, leggibilità invariata, costo di rendering azzerato. */
+.m-cap{position:absolute;left:16px;bottom:14px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:#fff;background:rgba(16,24,34,.8);padding:8px 14px;border-radius:100px}
 /* pannelli notturni alternati: il ritmo giorno/notte continua anche qui */
 .panel.dark,.panel.deep{color:#F6F1E6}
 .panel.dark{background:var(--notte-2)}
@@ -705,8 +709,12 @@ footer .wrap{position:relative;z-index:2;display:flex;flex-direction:column;gap:
 .sunrise.rising .sunrise-sun{transform:translateY(-40px);filter:drop-shadow(0 0 26px rgba(245,166,35,.85))}
 .sunrise.rising .sunrise-rays{opacity:1}
 
-/* ---- utilità reveal ---- */
-.fx{will-change:transform,opacity}
+/* ---- utilità reveal ----
+   v32 — PERF: rimosso `.fx{will-change:transform,opacity}`. Erano 20 elementi
+   promossi a layer GPU PERMANENTI per un'animazione d'ingresso che gira UNA
+   volta sola (once:true): memoria compositor sprecata per tutta la vita della
+   pagina, sensibile su mobile. GSAP promuove da sé il layer durante il tween
+   (matrix3d/force3D), quindi l'animazione resta identica. Reversibile. */
 
 /* ============================================================
    RESPONSIVE
@@ -955,7 +963,7 @@ body.menu-open{overflow:hidden}
 .nav-scrim.show{opacity:1;pointer-events:auto}
 
 /* BADGE DI VERIFICA DEPLOY — ELIMINARE DOPO IL TEST */
-body::after{content:'VER-2026-07-16-V31';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
+body::after{content:'VER-2026-07-16-V32';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 
 /* iter gse — v7 archivio split-screen */
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
@@ -1680,7 +1688,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
         </div>
         <div class="p-media">
           <div class="p-curtain" aria-hidden="true"></div>
-          <div class="zoom"><img src="./servizio1.webp" alt="Pannelli fotovoltaici monocristallini su tetto"></div>
+          <div class="zoom"><img decoding="async" loading="lazy" src="./servizio1.webp" alt="Pannelli fotovoltaici monocristallini su tetto"></div>
           <div class="m-cap">Pannelli fotovoltaici</div>
         </div>
       </article>
@@ -1695,7 +1703,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
         </div>
         <div class="p-media">
           <div class="p-curtain" aria-hidden="true"></div>
-          <div class="zoom"><img class="card-img" loading="lazy" src="./servizio2.webp" alt="Pompa di calore moderna installata su facciata"></div>
+          <div class="zoom"><img decoding="async" class="card-img" loading="lazy" src="./servizio2.webp" alt="Pompa di calore moderna installata su facciata"></div>
           <div class="m-cap">Pompe di calore</div>
         </div>
       </article>
@@ -1710,7 +1718,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
         </div>
         <div class="p-media">
           <div class="p-curtain" aria-hidden="true"></div>
-          <div class="zoom"><img loading="lazy" src="./servizio3.webp" alt="Soggiorno ristrutturato con nuovi infissi a tutta altezza"></div>
+          <div class="zoom"><img decoding="async" loading="lazy" src="./servizio3.webp" alt="Soggiorno ristrutturato con nuovi infissi a tutta altezza"></div>
           <div class="m-cap">Ristrutturazioni e infissi</div>
         </div>
       </article>
@@ -1725,7 +1733,7 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
         </div>
         <div class="p-media">
           <div class="p-curtain" aria-hidden="true"></div>
-          <div class="zoom"><img loading="lazy" src="./servizio4.webp" alt="Casa moderna di nuova costruzione con fotovoltaico integrato"></div>
+          <div class="zoom"><img decoding="async" loading="lazy" src="./servizio4.webp" alt="Casa moderna di nuova costruzione con fotovoltaico integrato"></div>
           <div class="m-cap">Case da zero</div>
         </div>
       </article>
@@ -1809,8 +1817,8 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
     <div class="cs-live fx" id="csLive">
       <div class="cs-cine2">
         <div class="cs-stage2" id="csStage">
-          <img class="st-img st-before" src="casa-prima.webp" alt="" aria-hidden="true" loading="lazy">
-          <img class="st-img st-after" id="stAfter" src="casa-dopo.webp" alt="La villetta Bianchi con l'impianto fotovoltaico attivo" loading="lazy">
+          <img decoding="async" class="st-img st-before" src="casa-prima.webp" alt="" aria-hidden="true" loading="lazy">
+          <img decoding="async" class="st-img st-after" id="stAfter" src="casa-dopo.webp" alt="La villetta Bianchi con l'impianto fotovoltaico attivo" loading="lazy">
           <div class="st-divider" id="stDiv" aria-hidden="true"><b>&#10096;&thinsp;&#10097;</b></div>
           <span class="st-tag st-ta">Prima</span>
           <span class="st-tag st-tb">Con REALHOME</span>
