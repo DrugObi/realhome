@@ -29,6 +29,18 @@ window.addEventListener('pageshow',function(e){
   window.scrollTo(0,0);
   if(window.lenisRef) window.lenisRef.scrollTo(0,{immediate:true,force:true});
 });
+/* ── PRE-INTRO (V70): lock precocissimo, PRIMA di qualunque libreria ──
+   Se e SOLO se il video pre-intro ha una sorgente reale (data-ready="1" sul
+   contenitore, che verrà messo quando il file sarà pronto), blocchiamo lo
+   scroll aggiungendo html.preintro. Finché il video NON c'è (stato attuale),
+   NON blocchiamo nulla: la pagina carica identica a prima, zero ritardo.
+   Questo gira qui in testa così non c'è mai un lampo di pagina sbloccata
+   dietro l'overlay prima che parta lo script principale. */
+(function(){try{
+  var d=document.documentElement;
+  /* la classe viene tolta dal boot dell'overlay (o subito, se niente video) */
+  if(d.getAttribute('data-preintro')==='1') d.classList.add('preintro');
+}catch(e){}})();
 </script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cg transform='translate%2810,10%29 scale%281.0%29'%3E%3Cg fill='%23F5A623'%3E%3Cpath d='M22 0l2.6 7.4-5.2 0z'/%3E%3Cpath d='M9.5 4.6l6 5.2-4.4 2.8z'/%3E%3Cpath d='M34.5 4.6l-1.6 8-4.4-2.8z'/%3E%3Cpath d='M2 14.5l7.6 2.4-2.6 4.6z'/%3E%3Cpath d='M42 14.5l-5 7-2.6-4.6z'/%3E%3C/g%3E%3Cpath d='M6 30 L22 16 L38 30' stroke='%23F4740B' stroke-width='4.6' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Cpath d='M13 32.5h18M13 36.5h18' stroke='%23F5A623' stroke-width='3' stroke-linecap='round' opacity='.9'/%3E%3C/g%3E%3C/svg%3E">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -705,7 +717,7 @@ footer .wrap{position:relative;z-index:2;display:flex;flex-direction:column;gap:
 body.menu-open{overflow:hidden}
 .nav-scrim{position:fixed;inset:0;background:rgba(4,8,15,.5);z-index:100;opacity:0;pointer-events:none;transition:opacity .42s var(--ease)}
 .nav-scrim.show{opacity:1;pointer-events:auto}
-body::after{content:'VER-2026-07-22-V69';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
+body::after{content:'VER-2026-07-22-V70';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
 .gse-track{position:relative}
 @media (min-width:981px){
@@ -983,9 +995,169 @@ input[type=range]:active::-moz-range-thumb{transform:scale(1.22)}
   background-size:cover;background-position:center;background-repeat:no-repeat;
 }
 .band:nth-child(1):hover .band-bg,.band:nth-child(1).lit .band-bg{opacity:1}
+html.preintro,html.preintro body{overflow:hidden!important;height:100%;touch-action:none}
+#preintro{position:fixed;inset:0;z-index:300;
+  display:flex;align-items:center;justify-content:center;
+  background:
+    radial-gradient(120% 90% at 50% 8%, #12203A 0%, var(--notte-2) 44%, var(--notte) 100%),
+    var(--notte);
+  opacity:1;transition:opacity .7s var(--ease);will-change:opacity}
+#preintro.is-hiding{opacity:0}
+#preintro.is-done{display:none}
+html:not([data-preintro="1"]) #preintro{display:none}
+#preintro .pi-video{position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center;background:var(--notte);
+  }
+#preintro .pi-veil{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 100% at 50% 120%, rgba(245,166,35,.14) 0%, transparent 55%)}
+#preintro .pi-brand{position:absolute;top:clamp(20px,4vw,34px);left:50%;
+  transform:translateX(-50%);z-index:2;display:flex;align-items:center;gap:9px;
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:800;
+  color:#F6F1E6;font-size:1.05rem;letter-spacing:.06em;opacity:.9}
+#preintro .pi-brand b{color:var(--sole);font-weight:800}
+#preintro .pi-skip{position:absolute;bottom:clamp(22px,5vw,40px);
+  right:clamp(20px,5vw,44px);z-index:3;
+  display:inline-flex;align-items:center;gap:9px;
+  padding:12px 22px;border-radius:100px;cursor:pointer;
+  font-family:'Instrument Sans',sans-serif;font-weight:600;font-size:.92rem;
+  color:#F6F1E6;background:rgba(246,241,230,.06);
+  border:1px solid rgba(246,241,230,.28);backdrop-filter:blur(6px);
+  transition:transform .3s var(--ease),border-color .3s,background .3s,color .3s}
+#preintro .pi-skip:hover{border-color:var(--sole);color:var(--sole);
+  background:rgba(245,166,35,.08);transform:translateY(-2px)}
+#preintro .pi-skip:active{transform:scale(.97)}
+#preintro .pi-skip svg{width:15px;height:15px;stroke:currentColor;fill:none;
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+#preintro .pi-bar{position:absolute;left:0;bottom:0;height:3px;width:100%;
+  z-index:2;background:rgba(255,255,255,.08)}
+#preintro .pi-bar>i{display:block;height:100%;width:0;background:var(--sole);
+  transition:width .2s linear}
+@media (max-width:600px){
+  #preintro .pi-skip{padding:11px 18px;font-size:.86rem}
+}
+@media (prefers-reduced-motion:reduce){
+  #preintro{transition:none}
+}
 </style>
 </head>
 <body>
+<div id="preintro" role="dialog" aria-label="Introduzione RealHome">
+  <span class="pi-brand" aria-hidden="true">REAL<b>HOME</b></span>
+  <video class="pi-video" id="piVideo" muted autoplay playsinline preload="none"
+         aria-label="Video di introduzione">
+  </video>
+  <div class="pi-veil" aria-hidden="true"></div>
+  <div class="pi-bar" aria-hidden="true"><i id="piBar"></i></div>
+  <button type="button" class="pi-skip" id="piSkip">
+    <span>Salta</span>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l7 7-7 7M13 5l7 7-7 7"/></svg>
+  </button>
+</div>
+<script>
+/* ── PRE-INTRO — boot autonomo (V70) ───────────────────────────────
+   Volutamente SENZA dipendenze (gira prima di GSAP/Lenis). Decide se
+   mostrare o saltare l'intro e gestisce chiusura, skip, fine video,
+   errori e sblocco dello scroll. Non rallenta il caricamento del sito:
+   il video ha preload="none" e, se non è predisposto, qui si esce subito. */
+(function(){
+  var html=document.documentElement;
+  var ov=document.getElementById('preintro');
+  if(!ov) return;
+  var video=document.getElementById('piVideo');
+  var skip=document.getElementById('piSkip');
+  var bar=document.getElementById('piBar');
+
+  /* Il video è "predisposto" solo se: intro attivata (data-preintro="1")
+     E c'è almeno un <source> con src reale dentro il <video>. Così, finché
+     l'altra sessione non consegna il file, l'intro non parte mai per sbaglio. */
+  var armed = html.getAttribute('data-preintro')==='1';
+  var hasSource = false;
+  if(video){
+    var ss=video.getElementsByTagName('source');
+    for(var i=0;i<ss.length;i++){ if(ss[i].getAttribute('src')){ hasSource=true; break; } }
+    if(!hasSource && video.getAttribute('src')) hasSource=true;
+  }
+  var reduce = false;
+  try{ reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+
+  var done=false;
+  function unlock(){
+    /* sblocca lo scroll: toglie il lock precoce messo in testa */
+    html.classList.remove('preintro');
+    /* ri-sincronizza lo scroll/anim se lo script principale è già attivo:
+       - hardScrollTop() riporta in cima e azzera Lenis
+       - ScrollTrigger.refresh() rimisura i trigger ora che il body è libero
+       entrambi opzionali: se non ci sono ancora, pazienza, il boot normale
+       del sito farà il suo corso. */
+    try{ if(typeof window.hardScrollTop==='function') window.hardScrollTop(); }catch(e){}
+    try{ if(window.ScrollTrigger && ScrollTrigger.refresh) ScrollTrigger.refresh(); }catch(e){}
+  }
+  function finish(){
+    if(done) return; done=true;
+    /* ferma e libera il video per non tenere memoria/decoder attivi */
+    try{ if(video){ video.pause(); video.removeAttribute('autoplay'); } }catch(e){}
+    ov.classList.add('is-hiding');
+    unlock();
+    var end=function(){ ov.classList.add('is-done'); ov.removeEventListener('transitionend',end); };
+    ov.addEventListener('transitionend',end);
+    /* rete di sicurezza: se transitionend non scatta (es. display forzato),
+       nascondi comunque dopo il tempo della transizione */
+    setTimeout(end,900);
+  }
+
+  /* USCITA IMMEDIATA — nessun video pronto, intro non attivata, o utente
+     con reduced-motion: niente overlay, sito subito navigabile. */
+  if(!armed || !hasSource || reduce){
+    /* assicura che il lock precoce (se mai messo) sia rimosso */
+    html.classList.remove('preintro');
+    ov.classList.add('is-done');
+    return;
+  }
+
+  /* Da qui: intro ARMATA e con sorgente. Il lock è già attivo da testa. */
+  if(skip){
+    skip.addEventListener('click',finish);
+  }
+  /* ESC salta l'intro (accessibilità da tastiera) */
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') finish(); });
+
+  if(video){
+    var started=false; /* diventa true appena il tempo avanza davvero */
+    /* barra di avanzamento + rilevamento "sta effettivamente andando" */
+    video.addEventListener('timeupdate',function(){
+      if(video.currentTime>0) started=true;
+      if(bar && video.duration){ bar.style.width=(video.currentTime/video.duration*100)+'%'; }
+    });
+    /* fine naturale del video → chiusura */
+    video.addEventListener('ended',finish);
+    /* qualunque fallimento di caricamento/decodifica → non intrappolare l'utente */
+    ['error','stalled','abort','emptied'].forEach(function(ev){
+      video.addEventListener(ev,function(){ if(!started) finish(); });
+    });
+    /* tentativo di play esplicito (con preload=none + <source> nel markup,
+       alcuni browser non fanno autoplay da soli): muted+playsinline lo rende
+       lecito. Se la policy lo blocca, chiudiamo invece di bloccare il sito. */
+    var p;
+    try{ video.load(); p=video.play(); }catch(e){ finish(); }
+    if(p && typeof p.catch==='function'){ p.catch(function(){ finish(); }); }
+    /* rete di sicurezza RAPIDA: se dopo 2.5s il video non è mai partito
+       (currentTime ancora 0), qualcosa non va (file assente/aperto da file://
+       /autoplay negato) → sblocca subito, niente frame congelato per 12s. */
+    setTimeout(function(){ if(!done && !started) finish(); },2500);
+    /* rete di sicurezza LUNGA: anche se è partito ma per qualche motivo non
+       arriva mai l'evento 'ended' (durata ignota), chiudi dopo la durata
+       reale +1s, o dopo 20s se la durata non è nota. */
+    setTimeout(function(){
+      if(done) return;
+      var d=video.duration;
+      if(d && isFinite(d)){ setTimeout(function(){ if(!done) finish(); },(d*1000)+1000); }
+      else { setTimeout(function(){ if(!done) finish(); },20000); }
+    },1200);
+  } else {
+    finish();
+  }
+})();
+</script>
 
 <div id="cursor" aria-hidden="true"></div>
 <div id="curtain" aria-hidden="true"><div class="word">REAL<b>HOME</b></div></div>
