@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informativa Privacy — RealHome</title>
+<meta name="robots" content="noindex, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+<!--
+  NOTA PER CHI PUBBLICA QUESTO SITO — non rimuovere prima della revisione:
+  Questo testo è un modello redatto sulla struttura richiesta dall'art. 13
+  GDPR, compilato con le informazioni realmente presenti nel codice del
+  sito (dati raccolti, terze parti effettivamente richiamate). NON sostituisce
+  la consulenza di un legale o di un DPO. In particolare, PRIMA della
+  pubblicazione online:
+    1) far validare il testo da un professionista;
+    2) inserire i dati anagrafici della società ancora segnaposto
+       (REA, capitale sociale — vedi footer del sito, marcati "da inserire");
+    3) se in futuro il modulo "Richiedi preventivo" verrà collegato a un
+       servizio esterno (Formspree, EmailJS, CRM, ecc. — vedi TO-DO
+       "submitLead() non invia i dati da nessuna parte" nell'handoff di
+       progetto), aggiungere quel fornitore all'elenco dei responsabili
+       del trattamento al punto 5, con relativa informativa/DPA;
+    4) se in futuro verranno attivati strumenti di analisi (Google Analytics,
+       Meta Pixel, ecc.), questa informativa e la cookie policy vanno
+       aggiornate PRIMA dell'attivazione, non dopo.
+-->
+
+<style>
+:root{
+  --notte:#070C16;
+  --giorno:#F6F1E6;
+  --giorno-2:#FFFDF7;
+  --ink:#101822;
+  --sole:#F5A623;
+  --fiamma:#F4740B;
+  --muted-l:#5E6672;
+  --line-l:rgba(16,24,34,.14);
+  --ease:cubic-bezier(.22,.61,.21,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  background:var(--giorno);color:var(--ink);line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:750;letter-spacing:-.02em;line-height:1.15}
+.wrap{max-width:820px;margin:0 auto;padding:0 24px}
+
+header{padding:26px 0;border-bottom:1px solid var(--line-l)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;max-width:1000px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)}
+.brand svg{flex:none}
+.brand span{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:1.05rem;letter-spacing:.03em}
+.brand span b{color:var(--fiamma)}
+.back{font-size:.88rem;color:var(--muted-l);text-decoration:none;border-bottom:1px solid transparent;transition:color .2s,border-color .2s}
+.back:hover{color:var(--fiamma);border-color:var(--fiamma)}
+
+main{padding:64px 0 90px}
+.eyebrow{font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--fiamma);font-weight:600;margin-bottom:14px}
+h1{font-size:clamp(2rem,4.4vw,2.8rem);margin-bottom:10px}
+.updated{color:var(--muted-l);font-size:.9rem;margin-bottom:48px}
+
+section{margin-bottom:38px}
+h2{font-size:1.3rem;margin-bottom:14px;color:var(--ink)}
+h2 .n{color:var(--sole);margin-right:8px}
+p{margin-bottom:14px;color:#2b3646}
+ul{margin:0 0 14px 22px}
+li{margin-bottom:8px;color:#2b3646}
+strong{color:var(--ink)}
+a.inline{color:var(--fiamma);text-decoration:underline;text-underline-offset:2px}
+.box{background:var(--giorno-2);border:1px solid var(--line-l);border-radius:16px;padding:22px 24px;margin:20px 0}
+.ph{font-style:normal;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--fiamma);opacity:.8;margin-left:4px}
+
+footer{border-top:1px solid var(--line-l);padding:34px 0 50px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:.82rem;color:var(--muted-l)}
+footer a{color:var(--muted-l);text-decoration:none;border-bottom:1px solid transparent}
+footer a:hover{color:var(--fiamma);border-color:var(--fiamma)}
+footer .sep{opacity:.5}
+
+@media (max-width:600px){
+  main{padding:44px 0 60px}
+  header .wrap{padding:0 20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="index.html">
+      <svg width="26" height="24" viewBox="0 0 44 40" fill="none" aria-hidden="true">
+        <g fill="#F5A623"><path d="M22 0l2.6 7.4-5.2 0z"/><path d="M9.5 4.6l6 5.2-4.4 2.8z"/><path d="M34.5 4.6l-1.6 8-4.4-2.8z"/><path d="M2 14.5l7.6 2.4-2.6 4.6z"/><path d="M42 14.5l-5 7-2.6-4.6z"/></g>
+        <path d="M6 30 L22 16 L38 30" stroke="#F4740B" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <path d="M13 32.5h18M13 36.5h18" stroke="#101822" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <span>REAL<b>HOME</b></span>
+    </a>
+    <a class="back" href="index.html">← Torna al sito</a>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <p class="eyebrow">Trattamento dei dati personali</p>
+    <h1>Informativa Privacy</h1>
+    <p class="updated">Ai sensi dell'art. 13 del Regolamento (UE) 2016/679 ("GDPR") e del D.Lgs. 196/2003, come modificato dal D.Lgs. 101/2018 · Ultimo aggiornamento: 23 luglio 2026</p>
+
+    <section>
+      <h2><span class="n">1.</span>Titolare del trattamento</h2>
+      <p>Il Titolare del trattamento dei dati personali raccolti tramite il sito <strong>realhome.it</strong> (di seguito, il "Sito") è:</p>
+      <div class="box">
+        <strong>RealHome S.r.l.</strong><br>
+        Via dell'Innovazione, 10 · 41121 Modena (MO)<br>
+        P.IVA/C.F. 01234567890<br>
+        PEC: <em class="ph">da inserire</em><br>
+        Email: <a class="inline" href="mailto:info@realhome.it">info@realhome.it</a> · Tel: +39 059 000000
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="n">2.</span>Quali dati raccogliamo</h2>
+      <p>A seconda di come interagisci con il Sito, possiamo trattare le seguenti categorie di dati:</p>
+      <ul>
+        <li><strong>Dati forniti volontariamente</strong>: nome, recapito telefonico, indirizzo email e indirizzo dell'immobile, quando compili il modulo "Richiedi il preventivo gratuito" o usi il simulatore di risparmio, oppure quando ci contatti via telefono o email.</li>
+        <li><strong>Dati tecnici e di navigazione</strong>: indirizzo IP, tipo di browser e dispositivo, pagine visitate, raccolti in modo automatico dal servizio di hosting nell'ambito del normale funzionamento dei protocolli di comunicazione internet.</li>
+      </ul>
+      <p>Il conferimento dei dati di contatto è facoltativo, ma necessario per poter rispondere alla tua richiesta di preventivo o informazioni: senza di essi non potremo ricontattarti.</p>
+    </section>
+
+    <section>
+      <h2><span class="n">3.</span>Finalità e base giuridica del trattamento</h2>
+      <ul>
+        <li><strong>Rispondere alle richieste di preventivo o contatto</strong> e svolgere le attività precontrattuali necessarie — base giuridica: esecuzione di misure precontrattuali su tua richiesta (art. 6.1.b GDPR).</li>
+        <li><strong>Adempiere a obblighi contrattuali, fiscali e contabili</strong> nel caso in cui la richiesta si trasformi in un rapporto commerciale — base giuridica: esecuzione del contratto e obblighi di legge (art. 6.1.b e 6.1.c GDPR).</li>
+        <li><strong>Sicurezza e corretto funzionamento del Sito</strong> (es. prevenzione di abusi) — base giuridica: legittimo interesse del Titolare (art. 6.1.f GDPR).</li>
+        <li><strong>Eventuali comunicazioni promozionali</strong>, solo se in futuro attivate e solo previo tuo specifico consenso — base giuridica: consenso (art. 6.1.a GDPR), revocabile in ogni momento.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2><span class="n">4.</span>Modalità e conservazione</h2>
+      <p>Il trattamento è effettuato con strumenti informatici e telematici, con logiche strettamente correlate alle finalità indicate e con misure di sicurezza tecniche e organizzative adeguate a prevenire perdita, uso illecito o accesso non autorizzato ai dati.</p>
+      <p>I dati raccolti tramite i moduli di contatto sono conservati per il tempo necessario a evadere la richiesta e, in caso di rapporto commerciale, per la durata prevista dagli obblighi di legge in materia fiscale e civilistica (fino a 10 anni per la documentazione contrattuale/contabile).</p>
+    </section>
+
+    <section>
+      <h2><span class="n">5.</span>Comunicazione dei dati e fornitori terzi</h2>
+      <p>I tuoi dati non sono oggetto di diffusione. Possono essere conosciuti, nei limiti delle rispettive competenze e in qualità di responsabili del trattamento, da:</p>
+      <ul>
+        <li>collaboratori e dipendenti di RealHome S.r.l. incaricati del trattamento;</li>
+        <li>il fornitore del servizio di hosting su cui il Sito è pubblicato;</li>
+        <li>l'eventuale fornitore terzo tramite cui, in futuro, verrà gestito l'invio dei moduli di contatto (servizio non ancora attivato alla data di questo aggiornamento).</li>
+      </ul>
+      <p>Il Sito richiama inoltre alcune risorse ospitate su server di terze parti — Google Fonts (caratteri tipografici), librerie script distribuite via CDN e immagini da un servizio cloud di terzi. Il caricamento di queste risorse comporta, per il solo funzionamento tecnico del web, che il tuo indirizzo IP sia visibile ai rispettivi fornitori, indipendentemente dall'uso di cookie: per i dettagli vedi la <a class="inline" href="cookie.html">Cookie Policy</a>. Alla data di questo aggiornamento, il Sito non utilizza strumenti di analisi statistica o pubblicitaria di terze parti.</p>
+    </section>
+
+    <section>
+      <h2><span class="n">6.</span>Trasferimento dei dati extra-UE</h2>
+      <p>Alcuni dei fornitori tecnici indicati al punto precedente (es. Google, per i caratteri tipografici) possono trattare dati anche al di fuori dello Spazio Economico Europeo. In tal caso, il trasferimento avviene sulla base delle garanzie previste dagli articoli 44 e seguenti del GDPR, incluse le Clausole Contrattuali Standard adottate dalla Commissione Europea.</p>
+    </section>
+
+    <section>
+      <h2><span class="n">7.</span>I tuoi diritti</h2>
+      <p>In qualità di interessato, hai il diritto di chiedere in qualsiasi momento al Titolare, ai sensi degli artt. 15-22 del GDPR:</p>
+      <ul>
+        <li>l'accesso ai tuoi dati personali e una copia degli stessi;</li>
+        <li>la rettifica dei dati inesatti o l'integrazione di quelli incompleti;</li>
+        <li>la cancellazione dei dati ("diritto all'oblio"), nei casi previsti dalla legge;</li>
+        <li>la limitazione del trattamento;</li>
+        <li>la portabilità dei dati forniti;</li>
+        <li>l'opposizione al trattamento basato sul legittimo interesse;</li>
+        <li>la revoca del consenso in ogni momento, ove il trattamento si basi su di esso.</li>
+      </ul>
+      <p>Puoi esercitare questi diritti scrivendo a <a class="inline" href="mailto:info@realhome.it">info@realhome.it</a>. Hai inoltre diritto di proporre reclamo al <strong>Garante per la protezione dei dati personali</strong> (www.garanteprivacy.it), qualora ritenga che il trattamento violi la normativa vigente.</p>
+    </section>
+
+    <section>
+      <h2><span class="n">8.</span>Modifiche alla presente informativa</h2>
+      <p>Questa informativa può essere aggiornata nel tempo, ad esempio in caso di nuovi servizi o obblighi normativi. La data di ultimo aggiornamento è indicata in cima alla pagina; ti invitiamo a consultarla periodicamente.</p>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="footYear">2026</span> RealHome S.r.l.</span>
+    <span class="sep">·</span>
+    <a href="privacy.html">Privacy</a>
+    <span class="sep">·</span>
+    <a href="cookie.html">Cookie</a>
+    <span class="sep">·</span>
+    <a href="termini.html">Termini</a>
+    <span class="sep">·</span>
+    <a href="index.html">Home</a>
+  </div>
+</footer>
+
+<script>document.getElementById('footYear').textContent = new Date().getFullYear();</script>
+</body>
+</html>
