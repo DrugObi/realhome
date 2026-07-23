@@ -714,7 +714,7 @@ footer .wrap{position:relative;z-index:2;display:flex;flex-direction:column;gap:
 body.menu-open{overflow:hidden}
 .nav-scrim{position:fixed;inset:0;background:rgba(4,8,15,.5);z-index:100;opacity:0;pointer-events:none;transition:opacity .42s var(--ease)}
 .nav-scrim.show{opacity:1;pointer-events:auto}
-body::after{content:'VER-2026-07-23-V76';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
+body::after{content:'VER-2026-07-23-V77';position:fixed;bottom:8px;left:8px;z-index:99999;font:600 11px/1 monospace;color:#fff;background:#c0392b;padding:4px 8px;border-radius:4px;pointer-events:none}
 .gse-split{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;min-height:64vh}
 .gse-track{position:relative}
 @media (min-width:981px){
@@ -1244,6 +1244,82 @@ html:not([data-preintro="1"]) #preintro{display:none}
 .field-consent.err label{color:#C4373B}
 .field-consent.err input[type=checkbox]{outline:2px solid #E5484D;outline-offset:2px}
 .form-legal{margin-top:12px;font-size:.72rem;line-height:1.55;color:var(--muted-l)}
+
+/* ============================================================
+   VER-2026-07-23-V77 — INDICATORE DI SCORRIMENTO, SEZIONE IMPATTO
+   Richiesta: stesso stile, pulizia e coerenza dell'indicatore dei
+   servizi (.hz-ui), sul lato destro, che segua lo scroll della sezione.
+
+   NOME: .imp-scrollui e non .imp-ui — .imp-ui ESISTE GIÀ ed è il
+   contenitore del contenuto dentro ogni .imp-page (`<div class="wrap
+   imp-ui">`, 3 occorrenze). Riusare quel nome avrebbe applicato queste
+   regole ai testi delle tre schermate, rompendo la sezione.
+
+   Perché non riuso .hz-ui tale e quale: quello vive su fondo CHIARO
+   (.day: #808a96 su bianco) ed è ORIZZONTALE, in basso a sinistra. Qui
+   il fondo è .notte e lo scorrimento è verticale. Ho quindi mantenuto
+   identici i valori che definiscono lo STILE — dimensioni tipografiche
+   (.88rem / .74rem), pesi (600), letter-spacing (.2em), tabular-nums,
+   gap 18px, spessore 2px e lunghezza 150px della barra, --fiamma per
+   l'avanzamento — e adattato solo ciò che dipende dal contesto: asse e
+   colori del fondo scuro. Le due UI sono riconoscibilmente la stessa cosa.
+
+   position:sticky invece di fixed: l'indicatore appartiene alla sezione,
+   non alla finestra — compare e sparisce con essa senza JS che lo
+   mostri/nasconda, e non può restare orfano a schermo. */
+/* MISURATO col browser: `float:right` qui NON funziona. Quando lo scroll
+   desktop è attivo la sezione riceve .live e diventa `display:grid`
+   (riga ~724): per spec CSS il float è inerte sui grid item, quindi
+   l'indicatore diventava una riga della griglia e scorreva via con la
+   pagina invece di restare agganciato (misurato: top da 2686px a 121px).
+   Soluzione: lo metto nella STESSA cella delle .imp-page (grid-row/column 1)
+   e uso lo stesso identico meccanismo sticky che usano loro — così l'ancoraggio
+   è quello già collaudato nella sezione, non un secondo sistema in parallelo. */
+.imp-scrollui{
+  position:sticky;top:0;
+  height:100lvh;              /* come .imp-page: lo sticky si aggancia in cima */
+  align-self:start;
+  justify-self:end;           /* lato destro della cella */
+  margin-right:clamp(18px,3.2vw,46px);
+  z-index:6;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;
+  pointer-events:none;        /* indicatore, non controllo: non ruba mai un click */
+}
+.impact.live .imp-scrollui{grid-row:1;grid-column:1}
+.imp-sc-count{
+  font-variant-numeric:tabular-nums;font-weight:600;font-size:.88rem;
+  color:var(--muted-d);letter-spacing:.02em;
+}
+/* barra verticale: stesso spessore (2px) e stessa lunghezza (150px) della
+   .hz-bar dei servizi, ruotata di 90° */
+.imp-sc-bar{
+  position:relative;width:2px;height:150px;
+  background:rgba(246,241,230,.16);overflow:hidden;border-radius:2px;
+}
+.imp-sc-bar i{
+  display:block;width:100%;height:100%;
+  background:var(--fiamma);transform-origin:top;transform:scaleY(0);
+}
+/* i tacchetti che separano le pagine: gemello di .hz-bar::after, che nei
+   servizi divide in 4 (25%) — qui in 3 (33.333%) */
+.imp-sc-bar::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(180deg,transparent 0 calc(33.333% - 1.5px),var(--notte) calc(33.333% - 1.5px) 33.333%);
+}
+.imp-sc-hint{
+  font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;font-weight:600;
+  color:var(--muted-d);
+  writing-mode:vertical-rl;    /* segue l'asse verticale della barra */
+}
+
+/* Sotto i 981px lo sticky desktop non è attivo (vedi impattoDesktop): le
+   pagine tornano in flusso e l'indicatore di riferimento è .imp-pills in
+   alto, già esistente. Due indicatori insieme sarebbero ridondanti e su
+   schermi stretti ruberebbero larghezza al contenuto. */
+@media (max-width:980px){
+  .imp-scrollui{display:none}
+}
 </style>
 </head>
 <body>
@@ -2234,6 +2310,24 @@ html:not([data-preintro="1"]) #preintro{display:none}
     </article>
 
   </div>
+
+  <!-- V77 — INDICATORE DI SCORRIMENTO VERTICALE.
+       Gemello di .hz-ui dei servizi (contatore "01 / 03" + barra di
+       avanzamento + etichetta), ruotato sull'asse verticale e ancorato a
+       destra, perché qui lo scorrimento è verticale mentre nei servizi è
+       orizzontale. Stessa gerarchia tipografica, stessi pesi, stesso
+       comportamento a scatti del contatore.
+
+       aria-hidden: è un doppione visivo di un'informazione già presente
+       nel contenuto (ogni pagina ha il suo "01 — La foresta"); annunciarlo
+       di nuovo a un lettore di schermo sarebbe rumore. Le .imp-pill di
+       mobile restano l'unico controllo interattivo: questo è un
+       INDICATORE, non una navigazione, come da richiesta. -->
+  <div class="imp-scrollui" id="impScrollUI" aria-hidden="true">
+    <span class="imp-sc-count" id="impCount">01 / 03</span>
+    <div class="imp-sc-bar"><i id="impBar"></i></div>
+    <span class="imp-sc-hint">Scorri</span>
+  </div>
 </section>
 <section class="reviews day" id="recensioni" data-theme="giorno">
   <div class="reviews-head wrap">
@@ -2901,19 +2995,46 @@ if (FX){
       pages.forEach((p,k)=>p.classList.toggle('is-live',k===i));
     };
     setActive(0); /* stato iniziale sincrono: niente attesa del primo scroll */
+
+    /* V77 — indicatore di scorrimento (contatore + barra), gemello di
+       quello dei servizi. Si aggancia allo ScrollTrigger che GIÀ esiste
+       qui sotto: nessun secondo trigger, nessun listener di scroll in più,
+       nessun costo aggiuntivo per frame. La barra segue il progress in
+       modo continuo (fluido), il numero scatta solo al cambio pagina —
+       esattamente il comportamento di .hz-count nei servizi. */
+    const count=document.getElementById('impCount');
+    const bar=document.getElementById('impBar');
+    const pad=n=>String(n).padStart(2,'0');
+    let lastN=-1;
+    const setCount=i=>{
+      if(!count||i===lastN)return;
+      lastN=i;
+      count.textContent=pad(i+1)+' / '+pad(pages.length);
+      /* stesso "scatto da tachimetro" del contatore servizi */
+      if(!reduceMotion){
+        gsap.fromTo(count,{yPercent:55,opacity:0},
+          {yPercent:0,opacity:1,duration:.35,ease:'power2.out',overwrite:'auto'});
+      }
+    };
+    setCount(0);
+    if(bar)bar.style.transform='scaleY(0)';
+
     const st=ScrollTrigger.create({
       trigger:impact,start:'top top',end:'bottom bottom',scrub:1,
       invalidateOnRefresh:true,
       onUpdate:self=>{
         const i=Math.min(pages.length-1,Math.floor(self.progress*pages.length));
         setActive(i);
+        if(bar)bar.style.transform='scaleY('+self.progress+')';
+        setCount(i);
       }
     });
     return ()=>{
       st.kill();
       impact.classList.remove('live');
       pages.forEach(p=>p.classList.remove('is-live'));
-      lastI=-1;
+      if(bar)bar.style.transform='scaleY(0)';
+      lastI=-1;lastN=-1;
     };
   });
   /* v29 — MOBILE: le pagine restano in flusso (niente sticky sotto i 981px:
